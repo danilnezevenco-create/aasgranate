@@ -1,0 +1,21 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "1",
+    "dstrgb": "1-srcalpha",
+    "srcalpha": "1",
+    "dstalpha": "1-srcalpha"
+  },
+  "vertex": "aasgranate:smoke_composite",
+  "fragment": "aasgranate:smoke_composite",
+  "attributes": [
+    "Position",
+    "UV0"
+  ],
+  "samplers": [
+    {
+      "name": "GlassColor"
+    }
+  ],
+  "uniforms": []
+}

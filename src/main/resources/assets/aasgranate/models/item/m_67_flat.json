@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "aasgranate:item/m_67_gui_icon"
+  }
+}

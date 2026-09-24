@@ -1,0 +1,48 @@
+# Указываем загрузчик модов. Для Forge это javafml.
+modLoader="javafml"
+# Диапазон версий загрузчика (берется из gradle.properties)
+loaderVersion="${loader_version_range}"
+# Лицензия мода
+license="${mod_license}"
+
+[[mods]]
+# ID мода (aasgranate)
+modId="${mod_id}"
+# Версия мода
+version="${mod_version}"
+# Название мода
+displayName="${mod_name}"
+# Авторы
+authors="danilfb123"
+# Описание (используем многострочный текст)
+description='''
+Добавляет в игру набор реалистичных гранат: осколочные РГД-5, М67 и РГО,
+а также дымовые РДГ-2 и M18.
+Особенности: 3D модели (GeckoLib), кастомные анимации чеки и рычага,
+система разлёта осколков с расчётом столкновений, процедурный дым
+и искры без единой текстуры.
+'''
+
+# Зависимость от самого Forge
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Зависимость от Minecraft
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# ВАЖНО: Твой код использует GeckoLib, поэтому он ОБЯЗАТЕЛЕН в зависимостях
+[[dependencies.${mod_id}]]
+modId="geckolib"
+mandatory=true
+versionRange="[4.2,)" # Актуальная версия для 1.20.1
+ordering="AFTER"
+side="BOTH"

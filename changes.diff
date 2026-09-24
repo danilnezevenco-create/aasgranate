@@ -1,0 +1,1335 @@
+--- a/src/main/java/com/danilfb123/aasgranate/client/M18SmokeCloudRenderer.java
++++ b/src/main/java/com/danilfb123/aasgranate/client/M18SmokeCloudRenderer.java
+@@ -11,74 +11,21 @@
+ import org.joml.Quaternionf;
+ import org.joml.Vector3f;
+ 
+-/**
+- * Р СџРЎР‚Р С•РЎвЂ Р ВµР Т‘РЎС“РЎР‚Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР Р…Р Т‘Р ВµРЎР‚ Р Т‘РЎвЂ№Р СР С•Р Р†Р С•Р С–Р С• Р С•Р В±Р В»Р В°Р С”Р В° Р В Р вЂќР вЂњ-2.
+- *
+- * Р вЂќРЎвЂ№Р С Р СњР вЂў Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·РЎС“Р ВµРЎвЂљ Р Р…Р С‘ Р С•Р Т‘Р Р…Р С•Р в„– РЎвЂљР ВµР С”РЎРѓРЎвЂљРЎС“РЎР‚РЎвЂ№ Р С‘ Р Р…Р С‘ Р С•Р Т‘Р Р…Р С•Р в„– Р Р†Р В°Р Р…Р С‘Р В»РЎРЉР Р…Р С•Р в„– Р С—Р В°РЎР‚РЎвЂљР С‘Р С”Р В»-РЎРѓР С‘РЎРѓРЎвЂљР ВµР СРЎвЂ№:
+- * Р С•Р В±Р В»Р В°Р С”Р С• РЎРѓР С•Р В±Р С‘РЎР‚Р В°Р ВµРЎвЂљРЎРѓРЎРЏ Р С‘Р В· Р СР Р…Р С•Р В¶Р ВµРЎРѓРЎвЂљР Р†Р В° Р В±Р С‘Р В»Р В±Р С•РЎР‚Р Т‘Р С•Р Р†-Р’В«Р С”Р В»РЎС“Р В±Р С•Р Р†Р’В», Р С”Р В°Р В¶Р Т‘РЎвЂ№Р в„– Р С‘Р В· Р С”Р С•РЎвЂљР С•РЎР‚РЎвЂ№РЎвЂ¦ РІР‚вЂќ
+- * РЎРЊРЎвЂљР С• Р С”РЎР‚РЎС“Р С– (Р Т‘Р С‘РЎРѓР С”) Р С‘Р В· Р Т‘Р Р†РЎС“РЎвЂ¦ Р С”Р С•Р В»Р ВµРЎвЂ  РЎвЂљРЎР‚Р ВµРЎС“Р С–Р С•Р В»РЎРЉР Р…Р С‘Р С”Р С•Р Р† РЎРѓ Р С—Р В»Р В°Р Р†Р Р…РЎвЂ№Р С РЎРѓР С—Р В°Р Т‘Р С•Р С Р В°Р В»РЎРЉРЎвЂћРЎвЂ№ Р С” Р С”РЎР‚Р В°РЎР‹.
+- * Р В¦Р Р†Р ВµРЎвЂљ Р В·Р В°Р Т‘Р В°РЎвЂРЎвЂљРЎРѓРЎРЏ Р С—РЎР‚РЎРЏР СР С• Р Р† Р Р†Р ВµРЎР‚РЎв‚¬Р С‘Р Р…Р В°РЎвЂ¦, Р С—Р С•РЎРЊРЎвЂљР С•Р СРЎС“ РЎР‚Р ВµРЎРѓРЎС“РЎР‚РЎРѓР С—Р В°Р С” Р Р…Р Вµ Р СР С•Р В¶Р ВµРЎвЂљ Р Р…Р С‘ Р С—Р С•Р Т‘Р СР ВµР Р…Р С‘РЎвЂљРЎРЉ,
+- * Р Р…Р С‘ Р С•РЎвЂљР С”Р В»РЎР‹РЎвЂЎР С‘РЎвЂљРЎРЉ РЎРЊРЎвЂљР С•РЎвЂљ Р Т‘РЎвЂ№Р С.
+- *
+- * Р С™Р В»РЎС“Р В±РЎвЂ№ Р Т‘Р Р†Р С‘Р С–Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ Р С—Р С• Р Т‘Р ВµРЎвЂљР ВµРЎР‚Р СР С‘Р Р…Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р Р…Р С•Р в„– Р С—РЎРѓР ВµР Р†Р Т‘Р С•РЎРѓР В»РЎС“РЎвЂЎР В°Р в„–Р Р…Р С•Р в„– РЎвЂљРЎР‚Р В°Р ВµР С”РЎвЂљР С•РЎР‚Р С‘Р С‘: Р С—Р С•Р В·Р С‘РЎвЂ Р С‘РЎРЏ
+- * Р С”Р В°Р В¶Р Т‘Р С•Р С–Р С• Р В·Р В°Р Р†Р С‘РЎРѓР С‘РЎвЂљ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•РЎвЂљ id РЎРѓРЎС“РЎвЂ°Р Р…Р С•РЎРѓРЎвЂљР С‘, Р С‘Р Р…Р Т‘Р ВµР С”РЎРѓР В° Р С”Р В»РЎС“Р В±Р В° Р С‘ Р Р†РЎР‚Р ВµР СР ВµР Р…Р С‘ Р Т‘РЎвЂ№Р СР В»Р ВµР Р…Р С‘РЎРЏ,
+- * Р С—Р С•РЎРЊРЎвЂљР С•Р СРЎС“ РЎС“ Р Р†РЎРѓР ВµРЎвЂ¦ Р С‘Р С–РЎР‚Р С•Р С”Р С•Р Р† Р С”Р В°РЎР‚РЎвЂљР С‘Р Р…Р С”Р В° Р С•Р Т‘Р С‘Р Р…Р В°Р С”Р С•Р Р†Р В°РЎРЏ Р С‘ Р ВµРЎвЂ Р Р…Р Вµ Р Р…РЎС“Р В¶Р Р…Р С• РЎРѓР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р С‘РЎР‚Р С•Р Р†Р В°РЎвЂљРЎРЉ.
+- *
+- * --- Р С›Р С—РЎвЂљР С‘Р СР С‘Р В·Р В°РЎвЂ Р С‘Р С‘ (Р С–Р ВµР С•Р СР ВµРЎвЂљРЎР‚Р С‘РЎРЏ Р С‘ Р С‘РЎвЂљР С•Р С–Р С•Р Р†Р В°РЎРЏ Р С”Р В°РЎР‚РЎвЂљР С‘Р Р…Р С”Р В° Р Р…Р Вµ Р СР ВµР Р…РЎРЏРЎР‹РЎвЂљРЎРѓРЎРЏ) ---
+- *  1) Р вЂўР Т‘Р С‘Р Р…Р С‘РЎвЂЎР Р…Р В°РЎРЏ Р С•Р С”РЎР‚РЎС“Р В¶Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р Т‘Р С‘РЎРѓР С”Р В° Р С”Р В»РЎС“Р В±Р В° (SEG_COS/SEG_SIN) Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ Р Р…Р Вµ РЎРѓРЎвЂЎР С‘РЎвЂљР В°Р ВµРЎвЂљРЎРѓРЎРЏ
+- *     РЎвЂЎР ВµРЎР‚Р ВµР В· Math.cos/Math.sin Р Р…Р В° Р С”Р В°Р В¶Р Т‘РЎвЂ№Р в„– Р С”Р В»РЎС“Р В± РІР‚вЂќ Р С•Р Р…Р В° Р С•Р Т‘Р Р…Р В° Р С‘ РЎвЂљР В° Р В¶Р Вµ Р Т‘Р В»РЎРЏ Р Р†РЎРѓР ВµРЎвЂ¦
+- *     Р С”Р В»РЎС“Р В±Р С•Р Р† (РЎС“Р С–Р В»РЎвЂ№ Р В·Р В°Р Р†Р С‘РЎРѓРЎРЏРЎвЂљ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•РЎвЂљ Р С‘Р Р…Р Т‘Р ВµР С”РЎРѓР В° РЎРѓР ВµР С–Р СР ВµР Р…РЎвЂљР В°, Р Р…Р Вµ Р С•РЎвЂљ РЎРѓР В°Р СР С•Р С–Р С• Р С”Р В»РЎС“Р В±Р В°),
+- *     Р С—Р С•РЎРЊРЎвЂљР С•Р СРЎС“ Р С—Р С•РЎРѓРЎвЂЎР С‘РЎвЂљР В°Р Р…Р В° Р С•Р Т‘Р С‘Р Р… РЎР‚Р В°Р В· Р Р† static-Р В±Р В»Р С•Р С”Р Вµ Р С‘ Р С—Р ВµРЎР‚Р ВµР С‘РЎРѓР С—Р С•Р В»РЎРЉР В·РЎС“Р ВµРЎвЂљРЎРѓРЎРЏ. Р В Р В°Р Р…РЎРЉРЎв‚¬Р Вµ
+- *     РЎРЊРЎвЂљР С• Р В±РЎвЂ№Р В»Р С• 16 Р Р†РЎвЂ№Р В·Р С•Р Р†Р С•Р Р† Math.sin/cos Р Р…Р В° Р С”Р В°Р В¶Р Т‘РЎвЂ№Р в„– Р С”Р В»РЎС“Р В± (8 РЎРѓР ВµР С–Р СР ВµР Р…РЎвЂљР С•Р Р† Р“вЂ” 2 РЎС“Р С–Р В»Р В°) РІР‚вЂќ
+- *     РЎвЂљР С• Р ВµРЎРѓРЎвЂљРЎРЉ РЎвЂљРЎвЂ№РЎРѓРЎРЏРЎвЂЎР С‘ Р В»Р С‘РЎв‚¬Р Р…Р С‘РЎвЂ¦ РЎвЂљРЎР‚Р С‘Р С–Р С•Р Р…Р С•Р СР ВµРЎвЂљРЎР‚Р С‘РЎвЂЎР ВµРЎРѓР С”Р С‘РЎвЂ¦ Р Р†РЎвЂ№Р В·Р С•Р Р†Р С•Р Р† Р Р† Р С”Р В°Р Т‘РЎР‚ Р Р…Р В° Р С•Р Т‘Р Р…РЎС“ РЎв‚¬Р В°РЎв‚¬Р С”РЎС“.
+- *  2) Р вЂР В°Р В·Р С‘РЎРѓ Р С”Р В°Р СР ВµРЎР‚РЎвЂ№ (right/up) Р С‘ Р С•РЎРѓР Р†Р ВµРЎвЂ°Р ВµР Р…Р С‘Р Вµ (bright) РЎРѓРЎвЂЎР С‘РЎвЂљР В°РЎР‹РЎвЂљРЎРѓРЎРЏ Р С•Р Т‘Р С‘Р Р… РЎР‚Р В°Р В· Р Р…Р В° Р Р†РЎвЂ№Р В·Р С•Р Р†
+- *     render(), Р В° Р Р…Р Вµ Р Т‘Р Р†Р В°Р В¶Р Т‘РЎвЂ№ (РЎР‚Р В°Р Р…РЎРЉРЎв‚¬Р Вµ Р С•РЎвЂљР Т‘Р ВµР В»РЎРЉР Р…Р С• Р С—Р ВµРЎР‚Р ВµРЎРѓРЎвЂЎР С‘РЎвЂљРЎвЂ№Р Р†Р В°Р В»Р С‘РЎРѓРЎРЉ Р С‘ Р Р† Р С•РЎРѓР Р…Р С•Р Р†Р Р…Р С•Р С
+- *     Р С•Р В±Р В»Р В°Р С”Р Вµ, Р С‘ Р Р† РЎв‚¬Р В»Р ВµР в„–РЎвЂћР Вµ, РЎвЂ¦Р С•РЎвЂљРЎРЏ Р В·Р Р…Р В°РЎвЂЎР ВµР Р…Р С‘РЎРЏ Р Р† РЎР‚Р В°Р СР С”Р В°РЎвЂ¦ Р С•Р Т‘Р Р…Р С•Р С–Р С• Р С”Р В°Р Т‘РЎР‚Р В° Р С‘Р Т‘Р ВµР Р…РЎвЂљР С‘РЎвЂЎР Р…РЎвЂ№).
+- *  3) Р вЂќР ВµРЎв‚¬РЎвЂР Р†Р В°РЎРЏ Р С—РЎР‚Р С•Р Р†Р ВµРЎР‚Р С”Р В° Р В°Р В»РЎРЉРЎвЂћРЎвЂ№ (Р С—Р С• Р С—Р В»Р С•РЎвЂљР Р…Р С•РЎРѓРЎвЂљР С‘/Р Т‘Р С‘РЎРѓРЎвЂљР В°Р Р…РЎвЂ Р С‘Р С‘ Р С•РЎвЂљ РЎвЂ Р ВµР Р…РЎвЂљРЎР‚Р В° Р С”Р В»РЎС“Р В±Р В°) РЎРѓР Т‘Р ВµР В»Р В°Р Р…Р В°
+- *     РЎР‚Р В°Р Р…РЎРЉРЎв‚¬Р Вµ Р Т‘Р С•РЎР‚Р С•Р С–Р С‘РЎвЂ¦ РЎвЂљРЎР‚Р С‘Р С–Р С•Р Р…Р С•Р СР ВµРЎвЂљРЎР‚Р С‘РЎвЂЎР ВµРЎРѓР С”Р С‘РЎвЂ¦ Р Р†РЎвЂ№РЎвЂЎР С‘РЎРѓР В»Р ВµР Р…Р С‘Р в„– Р С—Р С•Р В·Р С‘РЎвЂ Р С‘Р С‘ РІР‚вЂќ Р С”Р В»РЎС“Р В±РЎвЂ№, Р С”Р С•РЎвЂљР С•РЎР‚РЎвЂ№Р Вµ
+- *     Р Р†РЎРѓРЎвЂ РЎР‚Р В°Р Р†Р Р…Р С• Р Р…Р Вµ Р В±РЎС“Р Т‘РЎС“РЎвЂљ Р Р†Р С‘Р Т‘Р Р…РЎвЂ№ (Р В·Р В° Р С”РЎР‚Р В°Р ВµР С Р С•Р В±Р В»Р В°Р С”Р В° Р Р†Р С• Р Р†РЎР‚Р ВµР СРЎРЏ РЎР‚Р С•РЎРѓРЎвЂљР В°/Р В·Р В°РЎвЂљРЎС“РЎвЂ¦Р В°Р Р…Р С‘РЎРЏ),
+- *     Р Р…Р Вµ РЎвЂљРЎР‚Р В°РЎвЂљРЎРЏРЎвЂљ Р Р†РЎР‚Р ВµР СРЎРЏ Р Р…Р В° РЎРѓР С‘Р Р…РЎС“РЎРѓРЎвЂ№/Р С”Р С•РЎРѓР С‘Р Р…РЎС“РЎРѓРЎвЂ№ Р С—Р С•Р В·Р С‘РЎвЂ Р С‘Р С‘.
+- */
+ public final class M18SmokeCloudRenderer {
+ 
+     private M18SmokeCloudRenderer() {}
+ 
+-    // Р С›Р В±Р В»Р В°Р С”Р С• РЎС“Р Р†Р ВµР В»Р С‘РЎвЂЎР ВµР Р…Р С• Р Р† 2 РЎР‚Р В°Р В·Р В° Р С—Р С• РЎР‚Р В°Р Т‘Р С‘РЎС“РЎРѓРЎС“ (РЎРѓР С. M18Entity.SMOKE_RADIUS) Р С‘ Р В·Р В°Р СР ВµРЎвЂљР Р…Р С•
+-    // РЎС“Р С—Р В»Р С•РЎвЂљР Р…Р ВµР Р…Р С•: Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ Р С”Р В»РЎС“Р В±Р С•Р Р† Р Р…Р В° Р ВµР Т‘Р С‘Р Р…Р С‘РЎвЂ РЎС“ Р С—Р В»Р С•РЎвЂ°Р В°Р Т‘Р С‘ + Р Р†РЎвЂ№РЎв‚¬Р Вµ Р В°Р В»РЎРЉРЎвЂћР В° Р С‘ Р С—Р В»Р С•РЎвЂљР Р…Р ВµР Вµ РЎРѓР ВµРЎР‚Р Т‘РЎвЂ Р ВµР Р†Р С‘Р Р…Р В°
+-    // Р С”Р В°Р В¶Р Т‘Р С•Р С–Р С• Р С”Р В»РЎС“Р В±Р В°, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ РЎвЂЎР ВµРЎР‚Р ВµР В· Р Т‘РЎвЂ№Р С Р Р…Р С‘РЎвЂЎР ВµР С–Р С• Р Р…Р Вµ Р В±РЎвЂ№Р В»Р С• Р Р†Р С‘Р Т‘Р Р…Р С•.
++    private static final int PUFF_COUNT = 260;
+ 
+-    /** Р С™Р С•Р В»Р С‘РЎвЂЎР ВµРЎРѓРЎвЂљР Р†Р С• Р С”Р В»РЎС“Р В±Р С•Р Р† Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ. Р вЂР С•Р В»РЎРЉРЎв‚¬Р Вµ РІР‚вЂќ Р С—Р В»Р С•РЎвЂљР Р…Р ВµР Вµ Р С‘ Р Т‘Р С•РЎР‚Р С•Р В¶Р Вµ. */
+-    private static final int PUFF_COUNT = 260;
+-    /** Р РЋР ВµР С–Р СР ВµР Р…РЎвЂљР С•Р Р† Р С—Р С• Р С•Р С”РЎР‚РЎС“Р В¶Р Р…Р С•РЎРѓРЎвЂљР С‘ Р С•Р Т‘Р Р…Р С•Р С–Р С• Р С”Р В»РЎС“Р В±Р В°. */
+-    private static final int SEGMENTS = 8;
+ 
+-    /** Р вЂР В°Р В·Р С•Р Р†Р В°РЎРЏ Р В°Р В»РЎРЉРЎвЂћР В° Р С•Р Т‘Р Р…Р С•Р С–Р С• Р С”Р В»РЎС“Р В±Р В° (Р С‘РЎвЂљР С•Р С–Р С•Р Р†Р В°РЎРЏ Р С—Р В»Р С•РЎвЂљР Р…Р С•РЎРѓРЎвЂљРЎРЉ Р Р…Р В°Р В±Р С‘РЎР‚Р В°Р ВµРЎвЂљРЎРѓРЎРЏ Р Р…Р В°Р В»Р С•Р В¶Р ВµР Р…Р С‘Р ВµР С РЎРѓР В»Р С•РЎвЂР Р†). */
+     private static final float PUFF_ALPHA = 0.30F;
+-    /** Р вЂќР С•Р В»РЎРЏ РЎР‚Р В°Р Т‘Р С‘РЎС“РЎРѓР В° Р С”Р В»РЎС“Р В±Р В°, Р С”Р С•РЎвЂљР С•РЎР‚Р В°РЎРЏ Р Р…Р ВµР С—РЎР‚Р С•Р В·РЎР‚Р В°РЎвЂЎР Р…Р В° (Р С•РЎРѓРЎвЂљР В°Р В»РЎРЉР Р…Р С•Р Вµ РІР‚вЂќ Р СРЎРЏР С–Р С”Р С‘Р в„– РЎРѓР С—Р В°Р Т‘ Р С” Р С”РЎР‚Р В°РЎР‹). */
+-    private static final float PUFF_CORE_FRACTION = 0.60F;
+-    /** Р вЂР В°Р В·Р С•Р Р†РЎвЂ№Р в„– РЎвЂ Р Р†Р ВµРЎвЂљ Р Т‘РЎвЂ№Р СР В°. 0.58 РІР‚вЂќ Р С•Р В±РЎвЂ№РЎвЂЎР Р…РЎвЂ№Р в„– РЎРѓР ВµРЎР‚РЎвЂ№Р в„–; Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ = РЎРѓР Р†Р ВµРЎвЂљР В»Р ВµР Вµ, Р СР ВµР Р…РЎРЉРЎв‚¬Р Вµ = РЎвЂљР ВµР СР Р…Р ВµР Вµ. */
++
++
+     private static final float BASE_GREY = 0.58F;
+ 
+-    /** Р РЋР С”Р С•Р В»РЎРЉР С”Р С• Р С”Р В»РЎС“Р В±Р С•Р Р† РЎР‚Р С‘РЎРѓРЎС“Р ВµРЎвЂљРЎРѓРЎРЏ Р Р…Р В° Р С”Р В°Р В¶Р Т‘Р С•Р в„– РЎвЂљР С•РЎвЂЎР С”Р Вµ Р Т‘РЎвЂ№Р СР Р…Р С•Р С–Р С• РЎв‚¬Р В»Р ВµР в„–РЎвЂћР В°. */
+     private static final int TRAIL_PUFFS = 3;
+-    /** Р вЂР В°Р В·Р С•Р Р†Р В°РЎРЏ Р В°Р В»РЎРЉРЎвЂћР В° Р С”Р В»РЎС“Р В±Р В° РЎв‚¬Р В»Р ВµР в„–РЎвЂћР В°. */
++
+     private static final float TRAIL_ALPHA = 0.20F;
+-
+-    /**
+-     * Р вЂўР Т‘Р С‘Р Р…Р С‘РЎвЂЎР Р…Р В°РЎРЏ Р С•Р С”РЎР‚РЎС“Р В¶Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р Т‘Р С‘РЎРѓР С”Р В° Р С”Р В»РЎС“Р В±Р В°, Р С—Р С•РЎРѓРЎвЂЎР С‘РЎвЂљР В°Р Р…Р Р…Р В°РЎРЏ Р С•Р Т‘Р С‘Р Р… РЎР‚Р В°Р В·. Р Р€Р С–Р С•Р В» РЎРѓР ВµР С–Р СР ВµР Р…РЎвЂљР В° j
+-     * Р В·Р В°Р Р†Р С‘РЎРѓР С‘РЎвЂљ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•РЎвЂљ j Р С‘ SEGMENTS РІР‚вЂќ Р С•Р Р… Р С•Р Т‘Р С‘Р Р…Р В°Р С”Р С•Р Р† Р Т‘Р В»РЎРЏ Р В°Р В±РЎРѓР С•Р В»РЎР‹РЎвЂљР Р…Р С• Р Р†РЎРѓР ВµРЎвЂ¦ Р С”Р В»РЎС“Р В±Р С•Р Р†
+-     * (Р С”Р В»РЎС“Р В± Р Р…Р Вµ Р С—Р С•Р Р†Р С•РЎР‚Р В°РЎвЂЎР С‘Р Р†Р В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎРѓР В°Р С Р Р†Р С•Р С”РЎР‚РЎС“Р С– РЎРѓР Р†Р С•Р ВµР в„– Р С•РЎРѓР С‘ Р Р† drawPuff), Р С—Р С•РЎРЊРЎвЂљР С•Р СРЎС“ Р С—Р ВµРЎР‚Р ВµРЎРѓРЎвЂЎР С‘РЎвЂљРЎвЂ№Р Р†Р В°РЎвЂљРЎРЉ
+-     * Math.cos/Math.sin Р Р† Р С”Р В°Р В¶Р Т‘Р С•Р С Р С”Р В»РЎС“Р В±Р Вµ Р Р…Р В° Р С”Р В°Р В¶Р Т‘Р С•Р С Р С”Р В°Р Т‘РЎР‚Р Вµ Р В±Р ВµРЎРѓРЎРѓР СРЎвЂ№РЎРѓР В»Р ВµР Р…Р Р…Р С•.
+-     */
+-    private static final float[] SEG_COS = new float[SEGMENTS + 1];
+-    private static final float[] SEG_SIN = new float[SEGMENTS + 1];
+-    static {
+-        for (int j = 0; j <= SEGMENTS; j++) {
+-            double a = Math.PI * 2.0 * j / SEGMENTS;
+-            SEG_COS[j] = (float) Math.cos(a);
+-            SEG_SIN[j] = (float) Math.sin(a);
+-        }
+-    }
+ 
+     public static void render(M18Entity entity, float partialTick, PoseStack poseStack,
+                               MultiBufferSource bufferSource, int packedLight) {
+@@ -89,8 +36,6 @@
+         float t = entity.getSmokeTicks(partialTick);
+         if (t < 0.0F) return;
+ 
+-        // Р С›РЎРѓР Р†Р ВµРЎвЂ°Р ВµР Р…Р С‘Р Вµ Р С‘ Р В±Р С‘Р В»Р В±Р С•РЎР‚Р Т‘-Р В±Р В°Р В·Р С‘РЎРѓ Р С”Р В°Р СР ВµРЎР‚РЎвЂ№ Р С•Р В±РЎвЂ°Р С‘Р Вµ Р Т‘Р В»РЎРЏ Р С•Р В±Р В»Р В°Р С”Р В° Р С‘ РЎв‚¬Р В»Р ВµР в„–РЎвЂћР В° РІР‚вЂќ
+-        // РЎРѓРЎвЂЎР С‘РЎвЂљР В°Р ВµР С Р С•Р Т‘Р С‘Р Р… РЎР‚Р В°Р В· Р Р…Р В° Р Р†РЎвЂ№Р В·Р С•Р Р†, Р В° Р Р…Р Вµ Р Т‘Р Р†Р В°Р В¶Р Т‘РЎвЂ№.
+         int blockLight = LightTexture.block(packedLight);
+         int skyLight   = LightTexture.sky(packedLight);
+         float lum = Math.max(blockLight, skyLight) / 15.0F;
+@@ -103,10 +48,8 @@
+         VertexConsumer vc = bufferSource.getBuffer(SmokeRenderTypes.SMOKE);
+         Matrix4f pose = poseStack.last().pose();
+ 
+-        // Р вЂќРЎвЂ№Р СР Р…РЎвЂ№Р в„– РЎв‚¬Р В»Р ВµР в„–РЎвЂћ, Р С”Р С•РЎвЂљР С•РЎР‚РЎвЂ№Р в„– РЎв‚¬Р В°РЎв‚¬Р С”Р В° Р С•РЎРѓРЎвЂљР В°Р Р†Р В»РЎРЏР ВµРЎвЂљ Р Р† Р С—Р С•Р В»РЎвЂРЎвЂљР Вµ
+         renderTrail(entity, partialTick, vc, pose, right, up, bright);
+ 
+-        // Р В Р В°РЎРѓР С”РЎР‚РЎвЂ№РЎвЂљР С‘Р Вµ Р С•Р В±Р В»Р В°Р С”Р В°: РЎР‚Р В°Р Т‘Р С‘РЎС“РЎРѓ Р С‘ Р Р†РЎвЂ№РЎРѓР С•РЎвЂљР В° РЎР‚Р В°РЎРѓРЎвЂљРЎС“РЎвЂљ РЎРѓ Р В·Р В°Р СР ВµР Т‘Р В»Р ВµР Р…Р С‘Р ВµР С (ease-out).
+         float growth = entity.getSmokeGrowth(partialTick);
+         float inv = 1.0F - growth;
+         float ease = 1.0F - inv * inv * inv;
+@@ -114,31 +57,17 @@
+         float radius = M18Entity.SMOKE_RADIUS * (0.12F + 0.88F * ease);
+         float height = M18Entity.SMOKE_HEIGHT * (0.15F + 0.85F * ease);
+ 
+-        int id = entity.getId();
++        SmokePuffCache.Puff[] puffs = SmokePuffCache.get(entity, PUFF_COUNT);
+ 
+         for (int i = 0; i < PUFF_COUNT; i++) {
+-            int s = id * 8191 + i * 131;
++            SmokePuffCache.Puff puff = puffs[i];
++            float alpha = PUFF_ALPHA * puff.alphaFactor * density;
++            if (alpha <= 0.002F) continue;
++            float azimuth = puff.azimuth, rFrac = puff.rFrac, yFrac = puff.yFrac;
++            float sizeVar = puff.sizeVar, spin = puff.spin;
++            float p1 = puff.p1, p2 = puff.p2, p3 = puff.p3;
++            float greyVar = puff.greyVar;
+ 
+-            float azimuth  = hash(s) * ((float) Math.PI * 2.0F);
+-            float rFrac    = (float) Math.sqrt(hash(s + 1));       // РЎР‚Р В°Р Р†Р Р…Р С•Р СР ВµРЎР‚Р Р…Р С• Р С—Р С• Р С—Р В»Р С•РЎвЂ°Р В°Р Т‘Р С‘
+-            float alphaVar = 0.75F + 0.5F * hash(s + 9);
+-
+-            // Р С™Р В»РЎС“Р В±РЎвЂ№ РЎС“ Р С”РЎР‚Р В°РЎРЏ Р С•Р В±Р В»Р В°Р С”Р В° Р С—Р С•Р В»РЎС“Р С—РЎР‚Р С•Р В·РЎР‚Р В°РЎвЂЎР Р…Р ВµР Вµ РІР‚вЂќ Р С–РЎР‚Р В°Р Р…Р С‘РЎвЂ Р В° Р С—Р С•Р В»РЎС“РЎвЂЎР В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎР‚РЎвЂ№РЎвЂ¦Р В»Р С•Р в„–.
+-            // Р РЋРЎвЂЎР С‘РЎвЂљР В°Р ВµР С Р В°Р В»РЎРЉРЎвЂћРЎС“ Р РЋР В Р С’Р вЂ”Р Р€ (Р С•Р Р…Р В° Р В·Р В°Р Р†Р С‘РЎРѓР С‘РЎвЂљ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•РЎвЂљ rFrac/alphaVar/density) Р С‘
+-            // Р С•РЎвЂљРЎРѓР ВµР С”Р В°Р ВµР С Р Р…Р ВµР Р†Р С‘Р Т‘Р С‘Р СРЎвЂ№Р Вµ Р С”Р В»РЎС“Р В±РЎвЂ№ Р Т‘Р С• РЎвЂљР С•Р С–Р С•, Р С”Р В°Р С” РЎвЂљРЎР‚Р В°РЎвЂљР С‘РЎвЂљРЎРЉ Р Р†РЎР‚Р ВµР СРЎРЏ Р Р…Р В° РЎвЂљРЎР‚Р С‘Р С–Р С•Р Р…Р С•Р СР ВµРЎвЂљРЎР‚Р С‘РЎР‹ Р С—Р С•Р В·Р С‘РЎвЂ Р С‘Р С‘.
+-            float edgeFade = 1.0F - 0.40F * rFrac;
+-            float alpha = PUFF_ALPHA * alphaVar * edgeFade * density;
+-            if (alpha <= 0.002F) continue;
+-
+-            float yFrac   = (float) Math.pow(hash(s + 2), 1.35);  // РЎвЂЎРЎС“РЎвЂљРЎРЉ Р С—Р В»Р С•РЎвЂљР Р…Р ВµР Вµ РЎС“ Р В·Р ВµР СР В»Р С‘
+-            float sizeVar = 0.55F + 0.55F * hash(s + 3);
+-            float spin    = (hash(s + 4) - 0.5F) * 0.0035F;
+-            float p1      = hash(s + 5) * 6.2832F;
+-            float p2      = hash(s + 6) * 6.2832F;
+-            float p3      = hash(s + 7) * 6.2832F;
+-            float greyVar = (hash(s + 8) - 0.5F) * 0.12F;
+-
+-            // Р СљР ВµР Т‘Р В»Р ВµР Р…Р Р…Р С•Р Вµ Р Р†РЎР‚Р В°РЎвЂ°Р ВµР Р…Р С‘Р Вµ Р Р†РЎРѓР ВµР С–Р С• Р С•Р В±Р В»Р В°Р С”Р В° + Р В»РЎвЂР С–Р С”Р С•Р Вµ Р’В«Р Т‘РЎвЂ№РЎвЂ¦Р В°Р Р…Р С‘Р ВµР’В» Р С”Р В°Р В¶Р Т‘Р С•Р С–Р С• Р С”Р В»РЎС“Р В±Р В°.
+             float ang = azimuth + t * spin;
+             float rr  = rFrac * radius * (0.92F + 0.08F * sin(t * 0.010F + p1));
+ 
+@@ -162,14 +91,6 @@
+         }
+     }
+ 
+-    /**
+-     * Р вЂќРЎвЂ№Р СР Р…РЎвЂ№Р в„– РЎв‚¬Р В»Р ВµР в„–РЎвЂћ: Р С”Р В»РЎС“Р В±РЎвЂ№, Р С•РЎРѓРЎвЂљР В°Р Р†Р В»Р ВµР Р…Р Р…РЎвЂ№Р Вµ РЎв‚¬Р В°РЎв‚¬Р С”Р С•Р в„– Р Р† Р С—Р С•Р В»РЎвЂРЎвЂљР Вµ. Р С›Р Р…Р С‘ РЎвЂ¦РЎР‚Р В°Р Р…РЎРЏРЎвЂљРЎРѓРЎРЏ Р Р† Р СР С‘РЎР‚Р С•Р Р†РЎвЂ№РЎвЂ¦
+-     * Р С”Р С•Р С•РЎР‚Р Т‘Р С‘Р Р…Р В°РЎвЂљР В°РЎвЂ¦, Р С—Р С•РЎРЊРЎвЂљР С•Р СРЎС“ РЎРѓР СР ВµРЎвЂ°Р ВµР Р…Р С‘Р Вµ РЎРѓРЎвЂЎР С‘РЎвЂљР В°Р ВµРЎвЂљРЎРѓРЎРЏ Р С•РЎвЂљР Р…Р С•РЎРѓР С‘РЎвЂљР ВµР В»РЎРЉР Р…Р С• РЎвЂљР ВµР С”РЎС“РЎвЂ°Р ВµР в„– (Р С‘Р Р…РЎвЂљР ВµРЎР‚Р С—Р С•Р В»Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р Р…Р С•Р в„–)
+-     * Р С—Р С•Р В·Р С‘РЎвЂ Р С‘Р С‘ Р С–РЎР‚Р В°Р Р…Р В°РЎвЂљРЎвЂ№ РІР‚вЂќ РЎв‚¬Р В»Р ВµР в„–РЎвЂћ Р Р†Р С‘РЎРѓР С‘РЎвЂљ Р Р…Р В° Р СР ВµРЎРѓРЎвЂљР Вµ, Р В° РЎв‚¬Р В°РЎв‚¬Р С”Р В° РЎС“Р В»Р ВµРЎвЂљР В°Р ВµРЎвЂљ Р Р†Р С—Р ВµРЎР‚РЎвЂР Т‘.
+-     *
+-     * Р СџРЎР‚Р С‘Р Р…Р С‘Р СР В°Р ВµРЎвЂљ РЎС“Р В¶Р Вµ Р С–Р С•РЎвЂљР С•Р Р†РЎвЂ№Р Вµ vc/pose/right/up/bright Р С‘Р В· render(), РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р Р…Р Вµ Р С—Р ВµРЎР‚Р ВµРЎРѓРЎвЂЎР С‘РЎвЂљРЎвЂ№Р Р†Р В°РЎвЂљРЎРЉ
+-     * Р С”Р В°Р СР ВµРЎР‚РЎС“, Р С•РЎРѓР Р†Р ВµРЎвЂ°Р ВµР Р…Р С‘Р Вµ Р С‘ Р В±РЎС“РЎвЂћР ВµРЎР‚ Р Р†РЎвЂљР С•РЎР‚Р С•Р в„– РЎР‚Р В°Р В· Р В·Р В° Р С”Р В°Р Т‘РЎР‚.
+-     */
+     private static void renderTrail(M18Entity entity, float partialTick,
+                                     VertexConsumer vc, Matrix4f pose,
+                                     Vector3f right, Vector3f up, float bright) {
+@@ -183,13 +104,11 @@
+             float life = age / M18Entity.TRAIL_LIFE_TICKS;
+             if (life >= 1.0F) continue;
+ 
+-            // Р В±РЎвЂ№РЎРѓРЎвЂљРЎР‚Р С• Р С—Р С•РЎРЏР Р†Р В»РЎРЏР ВµРЎвЂљРЎРѓРЎРЏ, Р С—Р С•РЎвЂљР С•Р С Р С—Р В»Р В°Р Р†Р Р…Р С• РЎвЂљР В°Р ВµРЎвЂљ
+             float fadeIn  = Math.min(1.0F, age / 4.0F);
+             float fadeOut = 1.0F - life * life;
+             float alphaBase = TRAIL_ALPHA * fadeIn * fadeOut;
+             if (alphaBase <= 0.002F) continue;
+ 
+-            // Р С”Р В»РЎС“Р В± РЎР‚Р В°Р В·РЎР‚Р В°РЎРѓРЎвЂљР В°Р ВµРЎвЂљРЎРѓРЎРЏ Р С—Р С• Р СР ВµРЎР‚Р Вµ РЎРѓРЎвЂљР В°РЎР‚Р ВµР Р…Р С‘РЎРЏ
+             float grow = 0.22F + 0.85F * life;
+ 
+             float ox = (float) (puff.x - ex);
+@@ -200,7 +119,7 @@
+                 int s = puff.seed + k * 977;
+ 
+                 float dx = (hash(s)     - 0.5F) * 0.55F * grow;
+-                float dy = (hash(s + 1) - 0.5F) * 0.55F * grow + life * 0.45F; // Р В»РЎвЂР С–Р С”Р С‘Р в„– Р С—Р С•Р Т‘РЎР‰РЎвЂР С
++                float dy = (hash(s + 1) - 0.5F) * 0.55F * grow + life * 0.45F;
+                 float dz = (hash(s + 2) - 0.5F) * 0.55F * grow;
+ 
+                 float r = grow * (0.45F + 0.45F * hash(s + 3));
+@@ -216,53 +135,12 @@
+         }
+     }
+ 
+-    /**
+-     * Р С›Р Т‘Р С‘Р Р… Р’В«Р С”Р В»РЎС“Р В±Р’В»: Р В±Р С‘Р В»Р В±Р С•РЎР‚Р Т‘-Р Т‘Р С‘РЎРѓР С” Р С‘Р В· Р Т‘Р Р†РЎС“РЎвЂ¦ Р С”Р С•Р В»Р ВµРЎвЂ .
+-     * Р вЂ™Р Р…РЎС“РЎвЂљРЎР‚Р ВµР Р…Р Р…Р ВµР Вµ Р С”Р С•Р В»РЎРЉРЎвЂ Р С• Р Р…Р ВµР С—РЎР‚Р С•Р В·РЎР‚Р В°РЎвЂЎР Р…Р С•Р Вµ, Р Р†Р Р…Р ВµРЎв‚¬Р Р…Р ВµР Вµ РІР‚вЂќ РЎРѓ Р Р…РЎС“Р В»Р ВµР Р†Р С•Р в„– Р В°Р В»РЎРЉРЎвЂћР С•Р в„–, Р В·Р В° РЎРѓРЎвЂЎРЎвЂРЎвЂљ РЎвЂЎР ВµР С–Р С•
+-     * Р С—Р С•Р В»РЎС“РЎвЂЎР В°Р ВµРЎвЂљРЎРѓРЎРЏ Р СРЎРЏР С–Р С”Р С‘Р в„– РЎР‚Р В°Р В·Р СРЎвЂ№РЎвЂљРЎвЂ№Р в„– Р С”РЎР‚Р В°Р в„– Р В±Р ВµР В· Р Р†РЎРѓРЎРЏР С”Р С•Р в„– РЎвЂљР ВµР С”РЎРѓРЎвЂљРЎС“РЎР‚РЎвЂ№.
+-     *
+-     * Р Р€Р С–Р В»РЎвЂ№ РЎРѓР ВµР С–Р СР ВµР Р…РЎвЂљР С•Р Р† Р В±Р ВµРЎР‚РЎС“РЎвЂљРЎРѓРЎРЏ Р С‘Р В· Р С–Р С•РЎвЂљР С•Р Р†Р С•Р в„– РЎвЂљР В°Р В±Р В»Р С‘РЎвЂ РЎвЂ№ SEG_COS/SEG_SIN Р Р†Р СР ВµРЎРѓРЎвЂљР С•
+-     * Math.cos/Math.sin РІР‚вЂќ Р С–Р ВµР С•Р СР ВµРЎвЂљРЎР‚Р С‘РЎРЏ Р С—Р С•Р В±Р С‘РЎвЂљР С•Р Р†Р С• РЎвЂљР В° Р В¶Р Вµ РЎРѓР В°Р СР В°РЎРЏ, РЎвЂЎРЎвЂљР С• Р С‘ РЎР‚Р В°Р Р…РЎРЉРЎв‚¬Р Вµ,
+-     * Р С—РЎР‚Р С•РЎРѓРЎвЂљР С• Р В±Р ВµР В· Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р Р…Р С•Р С–Р С• РЎРѓРЎвЂЎРЎвЂРЎвЂљР В° РЎвЂљРЎР‚Р С‘Р С–Р С•Р Р…Р С•Р СР ВµРЎвЂљРЎР‚Р С‘Р С‘ Р Р…Р В° Р С”Р В°Р В¶Р Т‘РЎвЂ№Р в„– Р С”Р В»РЎС“Р В±.
+-     */
+     private static void drawPuff(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
+                                  float cx, float cy, float cz, float r,
+                                  int cr, int cg, int cb, int ca) {
+-
+-        float rInner = r * PUFF_CORE_FRACTION;
+-
+-        for (int j = 0; j < SEGMENTS; j++) {
+-            float c0 = SEG_COS[j],     s0 = SEG_SIN[j];
+-            float c1 = SEG_COS[j + 1], s1 = SEG_SIN[j + 1];
+-
+-            // Р В¦Р ВµР Р…РЎвЂљРЎР‚Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р’В«Р Р†Р ВµР ВµРЎР‚Р’В» (Р С”Р Р†Р В°Р Т‘ РЎРѓ Р Т‘Р Р†РЎС“Р СРЎРЏ РЎРѓР С•Р Р†Р С—Р В°Р Т‘Р В°РЎР‹РЎвЂ°Р С‘Р СР С‘ Р Р†Р ВµРЎР‚РЎв‚¬Р С‘Р Р…Р В°Р СР С‘ Р Р† РЎвЂ Р ВµР Р…РЎвЂљРЎР‚Р Вµ)
+-            vertex(vc, pose, right, up, cx, cy, cz, 0, 0, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, 0, 0, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * rInner, s1 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * rInner, s0 * rInner, cr, cg, cb, ca);
+-
+-            // Р вЂ™Р Р…Р ВµРЎв‚¬Р Р…Р ВµР Вµ Р С”Р С•Р В»РЎРЉРЎвЂ Р С•: Р В°Р В»РЎРЉРЎвЂћР В° РЎС“РЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљ Р Р† Р Р…Р С•Р В»РЎРЉ
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * rInner, s0 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * rInner, s1 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * r, s1 * r, cr, cg, cb, 0);
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * r, s0 * r, cr, cg, cb, 0);
+-        }
++        SmokeBillboard.draw(vc, pose, right, up, cx, cy, cz, r, cr, cg, cb, ca);
+     }
+ 
+-    private static void vertex(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
+-                               float cx, float cy, float cz, float ox, float oy,
+-                               int cr, int cg, int cb, int ca) {
+-        float x = cx + right.x() * ox + up.x() * oy;
+-        float y = cy + right.y() * ox + up.y() * oy;
+-        float z = cz + right.z() * ox + up.z() * oy;
+-        vc.vertex(pose, x, y, z).color(cr, cg, cb, ca).endVertex();
+-    }
+-
+-    // ------------------------------------------------------------------
+-    // Р Р€РЎвЂљР С‘Р В»Р С‘РЎвЂљРЎвЂ№
+-    // ------------------------------------------------------------------
+-
+-    /** Р вЂќР ВµРЎвЂљР ВµРЎР‚Р СР С‘Р Р…Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎвЂ¦Р ВµРЎв‚¬ -> [0,1). Р вЂР ВµР В· Р В°Р В»Р В»Р С•Р С”Р В°РЎвЂ Р С‘Р в„–, Р С•Р Т‘Р С‘Р Р…Р В°Р С”Р С•Р Р†РЎвЂ№Р в„– РЎС“ Р Р†РЎРѓР ВµРЎвЂ¦ Р С”Р В»Р С‘Р ВµР Р…РЎвЂљР С•Р Р†. */
+     private static float hash(int seed) {
+         int h = seed * 0x27D4EB2D;
+         h ^= h >>> 15;
+--- /dev/null
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeBillboard.java
+@@ -0,0 +1,27 @@
++package com.danilfb123.aasgranate.client;
++
++import com.mojang.blaze3d.vertex.VertexConsumer;
++import org.joml.Matrix4f;
++import org.joml.Vector3f;
++
++/** Four vertices; the shader reproduces the original octagon and 60% solid core. */
++final class SmokeBillboard {
++    private SmokeBillboard() {}
++
++    static void draw(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
++                     float x, float y, float z, float radius, int r, int g, int b, int a) {
++        vertex(vc, pose, right, up, x, y, z, radius, -1, -1, r, g, b, a);
++        vertex(vc, pose, right, up, x, y, z, radius,  1, -1, r, g, b, a);
++        vertex(vc, pose, right, up, x, y, z, radius,  1,  1, r, g, b, a);
++        vertex(vc, pose, right, up, x, y, z, radius, -1,  1, r, g, b, a);
++    }
++
++    private static void vertex(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
++                               float x, float y, float z, float radius, float u, float v,
++                               int r, int g, int b, int a) {
++        vc.vertex(pose, x + radius * (right.x * u + up.x * v),
++                        y + radius * (right.y * u + up.y * v),
++                        z + radius * (right.z * u + up.z * v))
++                .color(r, g, b, a).uv(u, v).endVertex();
++    }
++}
+--- a/src/main/java/com/danilfb123/aasgranate/client/SmokeCloudRenderer.java
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeCloudRenderer.java
+@@ -11,74 +11,21 @@
+ import org.joml.Quaternionf;
+ import org.joml.Vector3f;
+ 
+-/**
+- * РџСЂРѕС†РµРґСѓСЂРЅС‹Р№ СЂРµРЅРґРµСЂ РґС‹РјРѕРІРѕРіРѕ РѕР±Р»Р°РєР° Р Р”Р“-2.
+- *
+- * Р”С‹Рј РќР• РёСЃРїРѕР»СЊР·СѓРµС‚ РЅРё РѕРґРЅРѕР№ С‚РµРєСЃС‚СѓСЂС‹ Рё РЅРё РѕРґРЅРѕР№ РІР°РЅРёР»СЊРЅРѕР№ РїР°СЂС‚РёРєР»-СЃРёСЃС‚РµРјС‹:
+- * РѕР±Р»Р°РєРѕ СЃРѕР±РёСЂР°РµС‚СЃСЏ РёР· РјРЅРѕР¶РµСЃС‚РІР° Р±РёР»Р±РѕСЂРґРѕРІ-В«РєР»СѓР±РѕРІВ», РєР°Р¶РґС‹Р№ РёР· РєРѕС‚РѕСЂС‹С… вЂ”
+- * СЌС‚Рѕ РєСЂСѓРі (РґРёСЃРє) РёР· РґРІСѓС… РєРѕР»РµС† С‚СЂРµСѓРіРѕР»СЊРЅРёРєРѕРІ СЃ РїР»Р°РІРЅС‹Рј СЃРїР°РґРѕРј Р°Р»СЊС„С‹ Рє РєСЂР°СЋ.
+- * Р¦РІРµС‚ Р·Р°РґР°С‘С‚СЃСЏ РїСЂСЏРјРѕ РІ РІРµСЂС€РёРЅР°С…, РїРѕСЌС‚РѕРјСѓ СЂРµСЃСѓСЂСЃРїР°Рє РЅРµ РјРѕР¶РµС‚ РЅРё РїРѕРґРјРµРЅРёС‚СЊ,
+- * РЅРё РѕС‚РєР»СЋС‡РёС‚СЊ СЌС‚РѕС‚ РґС‹Рј.
+- *
+- * РљР»СѓР±С‹ РґРІРёРіР°СЋС‚СЃСЏ РїРѕ РґРµС‚РµСЂРјРёРЅРёСЂРѕРІР°РЅРЅРѕР№ РїСЃРµРІРґРѕСЃР»СѓС‡Р°Р№РЅРѕР№ С‚СЂР°РµРєС‚РѕСЂРёРё: РїРѕР·РёС†РёСЏ
+- * РєР°Р¶РґРѕРіРѕ Р·Р°РІРёСЃРёС‚ С‚РѕР»СЊРєРѕ РѕС‚ id СЃСѓС‰РЅРѕСЃС‚Рё, РёРЅРґРµРєСЃР° РєР»СѓР±Р° Рё РІСЂРµРјРµРЅРё РґС‹РјР»РµРЅРёСЏ,
+- * РїРѕСЌС‚РѕРјСѓ Сѓ РІСЃРµС… РёРіСЂРѕРєРѕРІ РєР°СЂС‚РёРЅРєР° РѕРґРёРЅР°РєРѕРІР°СЏ Рё РµС‘ РЅРµ РЅСѓР¶РЅРѕ СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊ.
+- *
+- * --- РћРїС‚РёРјРёР·Р°С†РёРё (РіРµРѕРјРµС‚СЂРёСЏ Рё РёС‚РѕРіРѕРІР°СЏ РєР°СЂС‚РёРЅРєР° РЅРµ РјРµРЅСЏСЋС‚СЃСЏ) ---
+- *  1) Р•РґРёРЅРёС‡РЅР°СЏ РѕРєСЂСѓР¶РЅРѕСЃС‚СЊ РґРёСЃРєР° РєР»СѓР±Р° (SEG_COS/SEG_SIN) Р±РѕР»СЊС€Рµ РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ
+- *     С‡РµСЂРµР· Math.cos/Math.sin РЅР° РєР°Р¶РґС‹Р№ РєР»СѓР± вЂ” РѕРЅР° РѕРґРЅР° Рё С‚Р° Р¶Рµ РґР»СЏ РІСЃРµС…
+- *     РєР»СѓР±РѕРІ (СѓРіР»С‹ Р·Р°РІРёСЃСЏС‚ С‚РѕР»СЊРєРѕ РѕС‚ РёРЅРґРµРєСЃР° СЃРµРіРјРµРЅС‚Р°, РЅРµ РѕС‚ СЃР°РјРѕРіРѕ РєР»СѓР±Р°),
+- *     РїРѕСЌС‚РѕРјСѓ РїРѕСЃС‡РёС‚Р°РЅР° РѕРґРёРЅ СЂР°Р· РІ static-Р±Р»РѕРєРµ Рё РїРµСЂРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ. Р Р°РЅСЊС€Рµ
+- *     СЌС‚Рѕ Р±С‹Р»Рѕ 16 РІС‹Р·РѕРІРѕРІ Math.sin/cos РЅР° РєР°Р¶РґС‹Р№ РєР»СѓР± (8 СЃРµРіРјРµРЅС‚РѕРІ Г— 2 СѓРіР»Р°) вЂ”
+- *     С‚Рѕ РµСЃС‚СЊ С‚С‹СЃСЏС‡Рё Р»РёС€РЅРёС… С‚СЂРёРіРѕРЅРѕРјРµС‚СЂРёС‡РµСЃРєРёС… РІС‹Р·РѕРІРѕРІ РІ РєР°РґСЂ РЅР° РѕРґРЅСѓ С€Р°С€РєСѓ.
+- *  2) Р‘Р°Р·РёСЃ РєР°РјРµСЂС‹ (right/up) Рё РѕСЃРІРµС‰РµРЅРёРµ (bright) СЃС‡РёС‚Р°СЋС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РЅР° РІС‹Р·РѕРІ
+- *     render(), Р° РЅРµ РґРІР°Р¶РґС‹ (СЂР°РЅСЊС€Рµ РѕС‚РґРµР»СЊРЅРѕ РїРµСЂРµСЃС‡РёС‚С‹РІР°Р»РёСЃСЊ Рё РІ РѕСЃРЅРѕРІРЅРѕРј
+- *     РѕР±Р»Р°РєРµ, Рё РІ С€Р»РµР№С„Рµ, С…РѕС‚СЏ Р·РЅР°С‡РµРЅРёСЏ РІ СЂР°РјРєР°С… РѕРґРЅРѕРіРѕ РєР°РґСЂР° РёРґРµРЅС‚РёС‡РЅС‹).
+- *  3) Р”РµС€С‘РІР°СЏ РїСЂРѕРІРµСЂРєР° Р°Р»СЊС„С‹ (РїРѕ РїР»РѕС‚РЅРѕСЃС‚Рё/РґРёСЃС‚Р°РЅС†РёРё РѕС‚ С†РµРЅС‚СЂР° РєР»СѓР±Р°) СЃРґРµР»Р°РЅР°
+- *     СЂР°РЅСЊС€Рµ РґРѕСЂРѕРіРёС… С‚СЂРёРіРѕРЅРѕРјРµС‚СЂРёС‡РµСЃРєРёС… РІС‹С‡РёСЃР»РµРЅРёР№ РїРѕР·РёС†РёРё вЂ” РєР»СѓР±С‹, РєРѕС‚РѕСЂС‹Рµ
+- *     РІСЃС‘ СЂР°РІРЅРѕ РЅРµ Р±СѓРґСѓС‚ РІРёРґРЅС‹ (Р·Р° РєСЂР°РµРј РѕР±Р»Р°РєР° РІРѕ РІСЂРµРјСЏ СЂРѕСЃС‚Р°/Р·Р°С‚СѓС…Р°РЅРёСЏ),
+- *     РЅРµ С‚СЂР°С‚СЏС‚ РІСЂРµРјСЏ РЅР° СЃРёРЅСѓСЃС‹/РєРѕСЃРёРЅСѓСЃС‹ РїРѕР·РёС†РёРё.
+- */
+ public final class SmokeCloudRenderer {
+ 
+     private SmokeCloudRenderer() {}
+ 
+-    // РћР±Р»Р°РєРѕ СѓРІРµР»РёС‡РµРЅРѕ РІ 2 СЂР°Р·Р° РїРѕ СЂР°РґРёСѓСЃСѓ (СЃРј. Rdg2Entity.SMOKE_RADIUS) Рё Р·Р°РјРµС‚РЅРѕ
+-    // СѓРїР»РѕС‚РЅРµРЅРѕ: Р±РѕР»СЊС€Рµ РєР»СѓР±РѕРІ РЅР° РµРґРёРЅРёС†Сѓ РїР»РѕС‰Р°РґРё + РІС‹С€Рµ Р°Р»СЊС„Р° Рё РїР»РѕС‚РЅРµРµ СЃРµСЂРґС†РµРІРёРЅР°
+-    // РєР°Р¶РґРѕРіРѕ РєР»СѓР±Р°, С‡С‚РѕР±С‹ С‡РµСЂРµР· РґС‹Рј РЅРёС‡РµРіРѕ РЅРµ Р±С‹Р»Рѕ РІРёРґРЅРѕ.
++    private static final int PUFF_COUNT = 260;
+ 
+-    /** РљРѕР»РёС‡РµСЃС‚РІРѕ РєР»СѓР±РѕРІ РІ РѕР±Р»Р°РєРµ. Р‘РѕР»СЊС€Рµ вЂ” РїР»РѕС‚РЅРµРµ Рё РґРѕСЂРѕР¶Рµ. */
+-    private static final int PUFF_COUNT = 260;
+-    /** РЎРµРіРјРµРЅС‚РѕРІ РїРѕ РѕРєСЂСѓР¶РЅРѕСЃС‚Рё РѕРґРЅРѕРіРѕ РєР»СѓР±Р°. */
+-    private static final int SEGMENTS = 8;
+ 
+-    /** Р‘Р°Р·РѕРІР°СЏ Р°Р»СЊС„Р° РѕРґРЅРѕРіРѕ РєР»СѓР±Р° (РёС‚РѕРіРѕРІР°СЏ РїР»РѕС‚РЅРѕСЃС‚СЊ РЅР°Р±РёСЂР°РµС‚СЃСЏ РЅР°Р»РѕР¶РµРЅРёРµРј СЃР»РѕС‘РІ). */
+     private static final float PUFF_ALPHA = 0.30F;
+-    /** Р”РѕР»СЏ СЂР°РґРёСѓСЃР° РєР»СѓР±Р°, РєРѕС‚РѕСЂР°СЏ РЅРµРїСЂРѕР·СЂР°С‡РЅР° (РѕСЃС‚Р°Р»СЊРЅРѕРµ вЂ” РјСЏРіРєРёР№ СЃРїР°Рґ Рє РєСЂР°СЋ). */
+-    private static final float PUFF_CORE_FRACTION = 0.60F;
+-    /** Р‘Р°Р·РѕРІС‹Р№ С†РІРµС‚ РґС‹РјР°. 0.58 вЂ” РѕР±С‹С‡РЅС‹Р№ СЃРµСЂС‹Р№; Р±РѕР»СЊС€Рµ = СЃРІРµС‚Р»РµРµ, РјРµРЅСЊС€Рµ = С‚РµРјРЅРµРµ. */
++
++
+     private static final float BASE_GREY = 0.58F;
+ 
+-    /** РЎРєРѕР»СЊРєРѕ РєР»СѓР±РѕРІ СЂРёСЃСѓРµС‚СЃСЏ РЅР° РєР°Р¶РґРѕР№ С‚РѕС‡РєРµ РґС‹РјРЅРѕРіРѕ С€Р»РµР№С„Р°. */
+     private static final int TRAIL_PUFFS = 3;
+-    /** Р‘Р°Р·РѕРІР°СЏ Р°Р»СЊС„Р° РєР»СѓР±Р° С€Р»РµР№С„Р°. */
++
+     private static final float TRAIL_ALPHA = 0.20F;
+-
+-    /**
+-     * Р•РґРёРЅРёС‡РЅР°СЏ РѕРєСЂСѓР¶РЅРѕСЃС‚СЊ РґРёСЃРєР° РєР»СѓР±Р°, РїРѕСЃС‡РёС‚Р°РЅРЅР°СЏ РѕРґРёРЅ СЂР°Р·. РЈРіРѕР» СЃРµРіРјРµРЅС‚Р° j
+-     * Р·Р°РІРёСЃРёС‚ С‚РѕР»СЊРєРѕ РѕС‚ j Рё SEGMENTS вЂ” РѕРЅ РѕРґРёРЅР°РєРѕРІ РґР»СЏ Р°Р±СЃРѕР»СЋС‚РЅРѕ РІСЃРµС… РєР»СѓР±РѕРІ
+-     * (РєР»СѓР± РЅРµ РїРѕРІРѕСЂР°С‡РёРІР°РµС‚СЃСЏ СЃР°Рј РІРѕРєСЂСѓРі СЃРІРѕРµР№ РѕСЃРё РІ drawPuff), РїРѕСЌС‚РѕРјСѓ РїРµСЂРµСЃС‡РёС‚С‹РІР°С‚СЊ
+-     * Math.cos/Math.sin РІ РєР°Р¶РґРѕРј РєР»СѓР±Рµ РЅР° РєР°Р¶РґРѕРј РєР°РґСЂРµ Р±РµСЃСЃРјС‹СЃР»РµРЅРЅРѕ.
+-     */
+-    private static final float[] SEG_COS = new float[SEGMENTS + 1];
+-    private static final float[] SEG_SIN = new float[SEGMENTS + 1];
+-    static {
+-        for (int j = 0; j <= SEGMENTS; j++) {
+-            double a = Math.PI * 2.0 * j / SEGMENTS;
+-            SEG_COS[j] = (float) Math.cos(a);
+-            SEG_SIN[j] = (float) Math.sin(a);
+-        }
+-    }
+ 
+     public static void render(Rdg2Entity entity, float partialTick, PoseStack poseStack,
+                               MultiBufferSource bufferSource, int packedLight) {
+@@ -89,8 +36,6 @@
+         float t = entity.getSmokeTicks(partialTick);
+         if (t < 0.0F) return;
+ 
+-        // РћСЃРІРµС‰РµРЅРёРµ Рё Р±РёР»Р±РѕСЂРґ-Р±Р°Р·РёСЃ РєР°РјРµСЂС‹ РѕР±С‰РёРµ РґР»СЏ РѕР±Р»Р°РєР° Рё С€Р»РµР№С„Р° вЂ”
+-        // СЃС‡РёС‚Р°РµРј РѕРґРёРЅ СЂР°Р· РЅР° РІС‹Р·РѕРІ, Р° РЅРµ РґРІР°Р¶РґС‹.
+         int blockLight = LightTexture.block(packedLight);
+         int skyLight   = LightTexture.sky(packedLight);
+         float lum = Math.max(blockLight, skyLight) / 15.0F;
+@@ -103,10 +48,8 @@
+         VertexConsumer vc = bufferSource.getBuffer(SmokeRenderTypes.SMOKE);
+         Matrix4f pose = poseStack.last().pose();
+ 
+-        // Р”С‹РјРЅС‹Р№ С€Р»РµР№С„, РєРѕС‚РѕСЂС‹Р№ С€Р°С€РєР° РѕСЃС‚Р°РІР»СЏРµС‚ РІ РїРѕР»С‘С‚Рµ
+         renderTrail(entity, partialTick, vc, pose, right, up, bright);
+ 
+-        // Р Р°СЃРєСЂС‹С‚РёРµ РѕР±Р»Р°РєР°: СЂР°РґРёСѓСЃ Рё РІС‹СЃРѕС‚Р° СЂР°СЃС‚СѓС‚ СЃ Р·Р°РјРµРґР»РµРЅРёРµРј (ease-out).
+         float growth = entity.getSmokeGrowth(partialTick);
+         float inv = 1.0F - growth;
+         float ease = 1.0F - inv * inv * inv;
+@@ -114,31 +57,17 @@
+         float radius = Rdg2Entity.SMOKE_RADIUS * (0.12F + 0.88F * ease);
+         float height = Rdg2Entity.SMOKE_HEIGHT * (0.15F + 0.85F * ease);
+ 
+-        int id = entity.getId();
++        SmokePuffCache.Puff[] puffs = SmokePuffCache.get(entity, PUFF_COUNT);
+ 
+         for (int i = 0; i < PUFF_COUNT; i++) {
+-            int s = id * 8191 + i * 131;
++            SmokePuffCache.Puff puff = puffs[i];
++            float alpha = PUFF_ALPHA * puff.alphaFactor * density;
++            if (alpha <= 0.002F) continue;
++            float azimuth = puff.azimuth, rFrac = puff.rFrac, yFrac = puff.yFrac;
++            float sizeVar = puff.sizeVar, spin = puff.spin;
++            float p1 = puff.p1, p2 = puff.p2, p3 = puff.p3;
++            float greyVar = puff.greyVar;
+ 
+-            float azimuth  = hash(s) * ((float) Math.PI * 2.0F);
+-            float rFrac    = (float) Math.sqrt(hash(s + 1));       // СЂР°РІРЅРѕРјРµСЂРЅРѕ РїРѕ РїР»РѕС‰Р°РґРё
+-            float alphaVar = 0.75F + 0.5F * hash(s + 9);
+-
+-            // РљР»СѓР±С‹ Сѓ РєСЂР°СЏ РѕР±Р»Р°РєР° РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅРµРµ вЂ” РіСЂР°РЅРёС†Р° РїРѕР»СѓС‡Р°РµС‚СЃСЏ СЂС‹С…Р»РѕР№.
+-            // РЎС‡РёС‚Р°РµРј Р°Р»СЊС„Сѓ РЎР РђР—РЈ (РѕРЅР° Р·Р°РІРёСЃРёС‚ С‚РѕР»СЊРєРѕ РѕС‚ rFrac/alphaVar/density) Рё
+-            // РѕС‚СЃРµРєР°РµРј РЅРµРІРёРґРёРјС‹Рµ РєР»СѓР±С‹ РґРѕ С‚РѕРіРѕ, РєР°Рє С‚СЂР°С‚РёС‚СЊ РІСЂРµРјСЏ РЅР° С‚СЂРёРіРѕРЅРѕРјРµС‚СЂРёСЋ РїРѕР·РёС†РёРё.
+-            float edgeFade = 1.0F - 0.40F * rFrac;
+-            float alpha = PUFF_ALPHA * alphaVar * edgeFade * density;
+-            if (alpha <= 0.002F) continue;
+-
+-            float yFrac   = (float) Math.pow(hash(s + 2), 1.35);  // С‡СѓС‚СЊ РїР»РѕС‚РЅРµРµ Сѓ Р·РµРјР»Рё
+-            float sizeVar = 0.55F + 0.55F * hash(s + 3);
+-            float spin    = (hash(s + 4) - 0.5F) * 0.0035F;
+-            float p1      = hash(s + 5) * 6.2832F;
+-            float p2      = hash(s + 6) * 6.2832F;
+-            float p3      = hash(s + 7) * 6.2832F;
+-            float greyVar = (hash(s + 8) - 0.5F) * 0.12F;
+-
+-            // РњРµРґР»РµРЅРЅРѕРµ РІСЂР°С‰РµРЅРёРµ РІСЃРµРіРѕ РѕР±Р»Р°РєР° + Р»С‘РіРєРѕРµ В«РґС‹С…Р°РЅРёРµВ» РєР°Р¶РґРѕРіРѕ РєР»СѓР±Р°.
+             float ang = azimuth + t * spin;
+             float rr  = rFrac * radius * (0.92F + 0.08F * sin(t * 0.010F + p1));
+ 
+@@ -162,14 +91,6 @@
+         }
+     }
+ 
+-    /**
+-     * Р”С‹РјРЅС‹Р№ С€Р»РµР№С„: РєР»СѓР±С‹, РѕСЃС‚Р°РІР»РµРЅРЅС‹Рµ С€Р°С€РєРѕР№ РІ РїРѕР»С‘С‚Рµ. РћРЅРё С…СЂР°РЅСЏС‚СЃСЏ РІ РјРёСЂРѕРІС‹С…
+-     * РєРѕРѕСЂРґРёРЅР°С‚Р°С…, РїРѕСЌС‚РѕРјСѓ СЃРјРµС‰РµРЅРёРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ С‚РµРєСѓС‰РµР№ (РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°РЅРЅРѕР№)
+-     * РїРѕР·РёС†РёРё РіСЂР°РЅР°С‚С‹ вЂ” С€Р»РµР№С„ РІРёСЃРёС‚ РЅР° РјРµСЃС‚Рµ, Р° С€Р°С€РєР° СѓР»РµС‚Р°РµС‚ РІРїРµСЂС‘Рґ.
+-     *
+-     * РџСЂРёРЅРёРјР°РµС‚ СѓР¶Рµ РіРѕС‚РѕРІС‹Рµ vc/pose/right/up/bright РёР· render(), С‡С‚РѕР±С‹ РЅРµ РїРµСЂРµСЃС‡РёС‚С‹РІР°С‚СЊ
+-     * РєР°РјРµСЂСѓ, РѕСЃРІРµС‰РµРЅРёРµ Рё Р±СѓС„РµСЂ РІС‚РѕСЂРѕР№ СЂР°Р· Р·Р° РєР°РґСЂ.
+-     */
+     private static void renderTrail(Rdg2Entity entity, float partialTick,
+                                     VertexConsumer vc, Matrix4f pose,
+                                     Vector3f right, Vector3f up, float bright) {
+@@ -183,13 +104,11 @@
+             float life = age / Rdg2Entity.TRAIL_LIFE_TICKS;
+             if (life >= 1.0F) continue;
+ 
+-            // Р±С‹СЃС‚СЂРѕ РїРѕСЏРІР»СЏРµС‚СЃСЏ, РїРѕС‚РѕРј РїР»Р°РІРЅРѕ С‚Р°РµС‚
+             float fadeIn  = Math.min(1.0F, age / 4.0F);
+             float fadeOut = 1.0F - life * life;
+             float alphaBase = TRAIL_ALPHA * fadeIn * fadeOut;
+             if (alphaBase <= 0.002F) continue;
+ 
+-            // РєР»СѓР± СЂР°Р·СЂР°СЃС‚Р°РµС‚СЃСЏ РїРѕ РјРµСЂРµ СЃС‚Р°СЂРµРЅРёСЏ
+             float grow = 0.22F + 0.85F * life;
+ 
+             float ox = (float) (puff.x - ex);
+@@ -200,7 +119,7 @@
+                 int s = puff.seed + k * 977;
+ 
+                 float dx = (hash(s)     - 0.5F) * 0.55F * grow;
+-                float dy = (hash(s + 1) - 0.5F) * 0.55F * grow + life * 0.45F; // Р»С‘РіРєРёР№ РїРѕРґСЉС‘Рј
++                float dy = (hash(s + 1) - 0.5F) * 0.55F * grow + life * 0.45F;
+                 float dz = (hash(s + 2) - 0.5F) * 0.55F * grow;
+ 
+                 float r = grow * (0.45F + 0.45F * hash(s + 3));
+@@ -216,53 +135,12 @@
+         }
+     }
+ 
+-    /**
+-     * РћРґРёРЅ В«РєР»СѓР±В»: Р±РёР»Р±РѕСЂРґ-РґРёСЃРє РёР· РґРІСѓС… РєРѕР»РµС†.
+-     * Р’РЅСѓС‚СЂРµРЅРЅРµРµ РєРѕР»СЊС†Рѕ РЅРµРїСЂРѕР·СЂР°С‡РЅРѕРµ, РІРЅРµС€РЅРµРµ вЂ” СЃ РЅСѓР»РµРІРѕР№ Р°Р»СЊС„РѕР№, Р·Р° СЃС‡С‘С‚ С‡РµРіРѕ
+-     * РїРѕР»СѓС‡Р°РµС‚СЃСЏ РјСЏРіРєРёР№ СЂР°Р·РјС‹С‚С‹Р№ РєСЂР°Р№ Р±РµР· РІСЃСЏРєРѕР№ С‚РµРєСЃС‚СѓСЂС‹.
+-     *
+-     * РЈРіР»С‹ СЃРµРіРјРµРЅС‚РѕРІ Р±РµСЂСѓС‚СЃСЏ РёР· РіРѕС‚РѕРІРѕР№ С‚Р°Р±Р»РёС†С‹ SEG_COS/SEG_SIN РІРјРµСЃС‚Рѕ
+-     * Math.cos/Math.sin вЂ” РіРµРѕРјРµС‚СЂРёСЏ РїРѕР±РёС‚РѕРІРѕ С‚Р° Р¶Рµ СЃР°РјР°СЏ, С‡С‚Рѕ Рё СЂР°РЅСЊС€Рµ,
+-     * РїСЂРѕСЃС‚Рѕ Р±РµР· РїРѕРІС‚РѕСЂРЅРѕРіРѕ СЃС‡С‘С‚Р° С‚СЂРёРіРѕРЅРѕРјРµС‚СЂРёРё РЅР° РєР°Р¶РґС‹Р№ РєР»СѓР±.
+-     */
+     private static void drawPuff(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
+                                  float cx, float cy, float cz, float r,
+                                  int cr, int cg, int cb, int ca) {
+-
+-        float rInner = r * PUFF_CORE_FRACTION;
+-
+-        for (int j = 0; j < SEGMENTS; j++) {
+-            float c0 = SEG_COS[j],     s0 = SEG_SIN[j];
+-            float c1 = SEG_COS[j + 1], s1 = SEG_SIN[j + 1];
+-
+-            // Р¦РµРЅС‚СЂР°Р»СЊРЅС‹Р№ В«РІРµРµСЂВ» (РєРІР°Рґ СЃ РґРІСѓРјСЏ СЃРѕРІРїР°РґР°СЋС‰РёРјРё РІРµСЂС€РёРЅР°РјРё РІ С†РµРЅС‚СЂРµ)
+-            vertex(vc, pose, right, up, cx, cy, cz, 0, 0, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, 0, 0, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * rInner, s1 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * rInner, s0 * rInner, cr, cg, cb, ca);
+-
+-            // Р’РЅРµС€РЅРµРµ РєРѕР»СЊС†Рѕ: Р°Р»СЊС„Р° СѓС…РѕРґРёС‚ РІ РЅРѕР»СЊ
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * rInner, s0 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * rInner, s1 * rInner, cr, cg, cb, ca);
+-            vertex(vc, pose, right, up, cx, cy, cz, c1 * r, s1 * r, cr, cg, cb, 0);
+-            vertex(vc, pose, right, up, cx, cy, cz, c0 * r, s0 * r, cr, cg, cb, 0);
+-        }
++        SmokeBillboard.draw(vc, pose, right, up, cx, cy, cz, r, cr, cg, cb, ca);
+     }
+ 
+-    private static void vertex(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
+-                               float cx, float cy, float cz, float ox, float oy,
+-                               int cr, int cg, int cb, int ca) {
+-        float x = cx + right.x() * ox + up.x() * oy;
+-        float y = cy + right.y() * ox + up.y() * oy;
+-        float z = cz + right.z() * ox + up.z() * oy;
+-        vc.vertex(pose, x, y, z).color(cr, cg, cb, ca).endVertex();
+-    }
+-
+-    // ------------------------------------------------------------------
+-    // РЈС‚РёР»РёС‚С‹
+-    // ------------------------------------------------------------------
+-
+-    /** Р”РµС‚РµСЂРјРёРЅРёСЂРѕРІР°РЅРЅС‹Р№ С…РµС€ -> [0,1). Р‘РµР· Р°Р»Р»РѕРєР°С†РёР№, РѕРґРёРЅР°РєРѕРІС‹Р№ Сѓ РІСЃРµС… РєР»РёРµРЅС‚РѕРІ. */
+     private static float hash(int seed) {
+         int h = seed * 0x27D4EB2D;
+         h ^= h >>> 15;
+--- /dev/null
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokePipeline.java
+@@ -0,0 +1,197 @@
++package com.danilfb123.aasgranate.client;
++
++import com.mojang.blaze3d.pipeline.RenderTarget;
++import com.mojang.blaze3d.pipeline.TextureTarget;
++import com.mojang.blaze3d.systems.RenderSystem;
++import com.mojang.blaze3d.vertex.BufferBuilder;
++import com.mojang.blaze3d.vertex.BufferUploader;
++import com.mojang.blaze3d.vertex.DefaultVertexFormat;
++import com.mojang.blaze3d.vertex.VertexBuffer;
++import com.mojang.blaze3d.vertex.VertexFormat;
++import net.minecraft.client.Minecraft;
++import net.minecraft.client.renderer.ShaderInstance;
++import org.joml.Matrix4f;
++
++/** One upload and global puff sort per frame; two depth-selected smoke passes. */
++final class SmokePipeline {
++    private static final BufferBuilder BUILDER = new BufferBuilder(256 * 1024);
++    private static final BufferBuilder FULLSCREEN = new BufferBuilder(256);
++    private static final Matrix4f MODEL_VIEW = new Matrix4f();
++    private static final Matrix4f PROJECTION = new Matrix4f();
++    private static VertexBuffer mesh;
++    private static RenderTarget glassTarget;
++    private static RenderTarget opaqueDepth;
++    private static RenderTarget activeGlass;
++    private static boolean pending, captured, capturing, fabulous;
++    private static int nesting;
++
++    private SmokePipeline() {}
++
++    static BufferBuilder begin(Matrix4f projection) {
++        pending = captured = capturing = false;
++        nesting = 0;
++        activeGlass = null;
++        fabulous = Minecraft.useShaderTransparency();
++        MODEL_VIEW.set(RenderSystem.getModelViewMatrix());
++        PROJECTION.set(projection);
++        BUILDER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
++        return BUILDER;
++    }
++
++    static void upload() {
++        BUILDER.setQuadSorting(RenderSystem.getVertexSorting());
++        BufferBuilder.RenderedBuffer data = BUILDER.end();
++        if (data.isEmpty()) {
++            data.release();
++            return;
++        }
++        if (mesh == null) mesh = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
++        mesh.bind();
++        try {
++            mesh.upload(data); // upload releases RenderedBuffer, including on failure
++        } finally {
++            VertexBuffer.unbind();
++        }
++        pending = true;
++    }
++
++    static void beginTranslucent() {
++        if (!pending || captured) return;
++        if (capturing) { nesting++; return; }
++        Minecraft mc = Minecraft.getInstance();
++        RenderTarget main = mc.getMainRenderTarget();
++        if (fabulous) {
++            activeGlass = mc.levelRenderer.getTranslucentTarget();
++            if (activeGlass == null) return;
++            opaqueDepth = resize(opaqueDepth, main);
++            opaqueDepth.copyDepthFrom(main);
++            activeGlass.bindWrite(false);
++        } else {
++            glassTarget = resize(glassTarget, main);
++            glassTarget.setClearColor(0, 0, 0, 0);
++            glassTarget.clear(Minecraft.ON_OSX);
++            glassTarget.copyDepthFrom(main);
++            glassTarget.bindWrite(false);
++            activeGlass = glassTarget;
++        }
++        capturing = true;
++    }
++
++    static void endTranslucent() {
++        if (!capturing) return;
++        if (nesting > 0) { nesting--; return; }
++        capturing = false;
++        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
++        try {
++            main.bindWrite(false);
++            draw(1, false); // behind glass; still tested against opaque-world depth
++            if (!fabulous) {
++                composite();
++                main.copyDepthFrom(activeGlass);
++            }
++            captured = true;
++        } finally {
++            main.bindWrite(false);
++        }
++    }
++
++    static void afterParticles() {
++        // If a third-party renderer bypasses the wrapped RenderType, draw before the
++        // Fabulous composite clears opaque depth. The fallback must not reveal smoke
++        // through solid walls (its glass ordering remains that renderer's limitation).
++        if (pending && (!fabulous || !captured)) finish();
++    }
++
++    static void afterLevel() {
++        // Also covers renderers which omit the usual terrain-layer callback.
++        if (pending) finish();
++    }
++
++    private static void finish() {
++        RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
++        try {
++            main.bindWrite(false);
++            draw(captured ? 2 : 0, fabulous && captured);
++        } finally {
++            pending = false;
++            activeGlass = null;
++            main.bindWrite(false);
++        }
++    }
++
++    private static void draw(int pass, boolean sampleOpaqueDepth) {
++        ShaderInstance shader = SmokeShaders.cloud();
++        shader.safeGetUniform("Pass").set(pass);
++        shader.safeGetUniform("UseOpaqueDepth").set(sampleOpaqueDepth ? 1 : 0);
++        // Never sample a texture attached to the framebuffer being drawn into.
++        if (activeGlass != null) shader.setSampler("GlassDepth", activeGlass.getDepthTextureId());
++        if (opaqueDepth != null) shader.setSampler("OpaqueDepth", opaqueDepth.getDepthTextureId());
++        RenderSystem.enableBlend();
++        RenderSystem.blendFuncSeparate(770, 771, 1, 771);
++        RenderSystem.disableCull();
++        RenderSystem.depthMask(false);
++        if (sampleOpaqueDepth) RenderSystem.disableDepthTest();
++        else { RenderSystem.enableDepthTest(); RenderSystem.depthFunc(515); }
++        mesh.bind();
++        try {
++            mesh.drawWithShader(MODEL_VIEW, PROJECTION, shader);
++        } finally {
++            VertexBuffer.unbind();
++            RenderSystem.depthMask(true);
++            RenderSystem.enableDepthTest();
++            RenderSystem.enableCull();
++            RenderSystem.disableBlend();
++            RenderSystem.defaultBlendFunc();
++        }
++    }
++
++    private static void composite() {
++        ShaderInstance shader = SmokeShaders.composite();
++        shader.setSampler("GlassColor", activeGlass.getColorTextureId());
++        RenderSystem.disableDepthTest();
++        RenderSystem.depthMask(false);
++        RenderSystem.enableBlend();
++        RenderSystem.blendFuncSeparate(1, 771, 1, 771);
++        RenderSystem.disableCull();
++        RenderSystem.setShader(() -> shader);
++        try {
++            FULLSCREEN.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
++            FULLSCREEN.vertex(-1, -1, 0).uv(0, 0).endVertex();
++            FULLSCREEN.vertex( 1, -1, 0).uv(1, 0).endVertex();
++            FULLSCREEN.vertex( 1,  1, 0).uv(1, 1).endVertex();
++            FULLSCREEN.vertex(-1,  1, 0).uv(0, 1).endVertex();
++            BufferUploader.drawWithShader(FULLSCREEN.end());
++        } finally {
++            RenderSystem.depthMask(true);
++            RenderSystem.enableDepthTest();
++            RenderSystem.enableCull();
++            RenderSystem.disableBlend();
++            RenderSystem.defaultBlendFunc();
++        }
++    }
++
++    private static RenderTarget resize(RenderTarget target, RenderTarget main) {
++        // Depth blits require matching depth formats, including Forge's stencil option.
++        if (target != null && target.isStencilEnabled() != main.isStencilEnabled()) {
++            target.destroyBuffers();
++            target = null;
++        }
++        if (target == null) {
++            target = new TextureTarget(main.width, main.height, true, Minecraft.ON_OSX);
++            if (main.isStencilEnabled()) target.enableStencil();
++            return target;
++        }
++        if (target.width != main.width || target.height != main.height)
++            target.resize(main.width, main.height, Minecraft.ON_OSX);
++        return target;
++    }
++
++    static void close() {
++        pending = captured = capturing = false;
++        activeGlass = null;
++        if (mesh != null) { mesh.close(); mesh = null; }
++        if (glassTarget != null) { glassTarget.destroyBuffers(); glassTarget = null; }
++        if (opaqueDepth != null) { opaqueDepth.destroyBuffers(); opaqueDepth = null; }
++        SmokePuffCache.clear();
++    }
++}
+--- /dev/null
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokePuffCache.java
+@@ -0,0 +1,51 @@
++package com.danilfb123.aasgranate.client;
++
++import java.util.Map;
++import java.util.WeakHashMap;
++import net.minecraft.world.entity.Entity;
++
++/** Immutable random attributes; weak keys do not retain removed grenades/worlds. */
++final class SmokePuffCache {
++    private static final Map<Entity, Puff[]> CACHE = new WeakHashMap<>();
++
++    private SmokePuffCache() {}
++
++    static Puff[] get(Entity entity, int count) {
++        Puff[] puffs = CACHE.get(entity);
++        if (puffs == null || puffs.length != count) {
++            puffs = new Puff[count];
++            for (int i = 0; i < count; i++) puffs[i] = new Puff(entity.getId() * 8191 + i * 131);
++            CACHE.put(entity, puffs);
++        }
++        return puffs;
++    }
++
++    static void clear() { CACHE.clear(); }
++
++    static final class Puff {
++        final float azimuth, rFrac, yFrac, sizeVar, spin, p1, p2, p3, greyVar, alphaFactor;
++
++        Puff(int seed) {
++            azimuth = hash(seed) * ((float) Math.PI * 2.0F);
++            rFrac = (float) Math.sqrt(hash(seed + 1));
++            yFrac = (float) Math.pow(hash(seed + 2), 1.35);
++            sizeVar = 0.55F + 0.55F * hash(seed + 3);
++            spin = (hash(seed + 4) - 0.5F) * 0.0035F;
++            p1 = hash(seed + 5) * 6.2832F;
++            p2 = hash(seed + 6) * 6.2832F;
++            p3 = hash(seed + 7) * 6.2832F;
++            greyVar = (hash(seed + 8) - 0.5F) * 0.12F;
++            alphaFactor = (0.75F + 0.5F * hash(seed + 9)) * (1.0F - 0.40F * rFrac);
++        }
++    }
++
++    private static float hash(int seed) {
++        int h = seed * 0x27D4EB2D;
++        h ^= h >>> 15;
++        h *= 0x85EBCA6B;
++        h ^= h >>> 13;
++        h *= 0xC2B2AE35;
++        h ^= h >>> 16;
++        return (h >>> 8) / (float) (1 << 24);
++    }
++}
+--- a/src/main/java/com/danilfb123/aasgranate/client/SmokeRenderTypes.java
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeRenderTypes.java
+@@ -5,16 +5,6 @@
+ import net.minecraft.client.renderer.GameRenderer;
+ import net.minecraft.client.renderer.RenderType;
+ 
+-/**
+- * РЎРѕР±СЃС‚РІРµРЅРЅС‹Р№ RenderType РґР»СЏ РґС‹РјР°.
+- *
+- * Р’Р°Р¶РЅРѕ: С„РѕСЂРјР°С‚ РІРµСЂС€РёРЅ POSITION_COLOR вЂ” С‚Рѕ РµСЃС‚СЊ РЅРё РѕРґРЅРѕР№ С‚РµРєСЃС‚СѓСЂС‹ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ,
+- * РіРµРѕРјРµС‚СЂРёСЏ РєСЂР°СЃРёС‚СЃСЏ С‚РѕР»СЊРєРѕ С†РІРµС‚РѕРј РІРµСЂС€РёРЅ. РРјРµРЅРЅРѕ РїРѕСЌС‚РѕРјСѓ РґС‹Рј РЅРµРІРѕР·РјРѕР¶РЅРѕ РѕС‚РєР»СЋС‡РёС‚СЊ
+- * РёР»Рё РїРѕРґРјРµРЅРёС‚СЊ СЂРµСЃСѓСЂСЃРїР°РєРѕРј: РїРѕРґРјРµРЅСЏС‚СЊ С‚Р°Рј РїСЂРѕСЃС‚Рѕ РЅРµС‡РµРіРѕ.
+- *
+- * РљР»Р°СЃСЃ РЅР°СЃР»РµРґСѓРµС‚СЃСЏ РѕС‚ RenderType С‚РѕР»СЊРєРѕ СЂР°РґРё РґРѕСЃС‚СѓРїР° Рє protected-РјРµС‚РѕРґСѓ create(...)
+- * Рё protected-РєРѕРЅСЃС‚Р°РЅС‚Р°Рј СЃРѕСЃС‚РѕСЏРЅРёР№ (TRANSLUCENT_TRANSPARENCY, NO_CULL Рё С‚.Рґ.).
+- */
+ public class SmokeRenderTypes extends RenderType {
+ 
+     private SmokeRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize,
+@@ -25,40 +15,29 @@
+ 
+     public static final RenderType SMOKE = RenderType.create(
+             "aasgranate_smoke",
+-            DefaultVertexFormat.POSITION_COLOR,
++            DefaultVertexFormat.POSITION_COLOR_TEX,
+             VertexFormat.Mode.QUADS,
+-            // Р’РµСЂРЅСѓР»РёСЃСЊ Рє РґРёСЃРєР°Рј (64 РІРµСЂС€РёРЅС‹ РЅР° РєР»СѓР±) + РґРѕР±Р°РІРёР»РёСЃСЊ 2 РґРёСЃРєР° "СЏРґСЂР°" вЂ”
+-            // Р±СѓС„РµСЂ СЃРЅРѕРІР° РїРѕР±РѕР»СЊС€Рµ, С‡С‚РѕР±С‹ СЂРµР¶Рµ РїРµСЂРµР°Р»Р»РѕС†РёСЂРѕРІР°Р»СЃСЏ.
++
+             512 * 1024,
+             false,
+-            true, // СЃРѕСЂС‚РёСЂРѕРІРєР° РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹С… РєРІР°РґРѕРІ РїСЂРё Р·Р°РіСЂСѓР·РєРµ Р±СѓС„РµСЂР°
++            true,
+             RenderType.CompositeState.builder()
+-                    .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorShader))
++                    .setShaderState(new ShaderStateShard(SmokeShaders::cloud))
+                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+-                    .setCullState(NO_CULL)          // РѕР±Р»Р°РєРѕ РІРёРґРЅРѕ Рё РёР·РЅСѓС‚СЂРё
+-                    .setWriteMaskState(COLOR_WRITE) // РЅРµ РїРёС€РµРј РІ depth, РёРЅР°С‡Рµ РєР»СѓР±С‹ СЂРµР¶СѓС‚ РґСЂСѓРі РґСЂСѓРіР°
++                    .setCullState(NO_CULL)
++                    .setWriteMaskState(COLOR_WRITE)
+                     .setDepthTestState(LEQUAL_DEPTH_TEST)
+                     .setLightmapState(NO_LIGHTMAP)
+-                    // РЎРґРІРёРіР°РµС‚ СЌС„С„РµРєС‚РёРІРЅСѓСЋ РіР»СѓР±РёРЅСѓ РґС‹РјР° С‡СѓС‚СЊ Р±Р»РёР¶Рµ Рє РєР°РјРµСЂРµ (РєР°Рє Сѓ РІР°РЅРёР»СЊРЅС‹С…
+-                    // decal-РѕРІРµСЂР»РµРµРІ РІСЂРѕРґРµ С‚СЂРµС‰РёРЅ РЅР° Р±Р»РѕРєР°С…). РќСѓР¶РЅРѕ, С‡С‚РѕР±С‹ РґС‹Рј РІС‹РёРіСЂС‹РІР°Р»
+-                    // СЃСЂР°РІРЅРµРЅРёРµ РіР»СѓР±РёРЅС‹ Сѓ decal-РіРµРѕРјРµС‚СЂРёРё TACZ (РґС‹СЂРєРё РѕС‚ РїСѓР»СЊ), РєРѕС‚РѕСЂР°СЏ СЃР°РјР°
+-                    // СЃР»РµРіРєР° СЃРјРµС‰РµРЅР° РІРїРµСЂС‘Рґ РѕС‚ РіСЂР°РЅРё Р±Р»РѕРєР°, С‡С‚РѕР±С‹ РЅРµ z-fight'РёС‚СЊ СЃ РЅРµР№.
+-                    // РЎРјРµС‰РµРЅРёРµ РјРёРєСЂРѕСЃРєРѕРїРёС‡РµСЃРєРѕРµ, РЅР° РїРµСЂРµРєСЂС‹С‚РёРµ РґС‹РјР° РЅР°СЃС‚РѕСЏС‰РёРјРё СЃС‚РµРЅР°РјРё РЅРµ РІР»РёСЏРµС‚.
+-                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
++
+                     .createCompositeState(false));
+ 
+-    /**
+-     * РћС‚РґРµР»СЊРЅС‹Р№ RenderType РґР»СЏ РёСЃРєСЂ: С‚Р° Р¶Рµ Р±РµcС‚РµРєСЃС‚СѓСЂРЅР°СЏ РіРµРѕРјРµС‚СЂРёСЏ (POSITION_COLOR),
+-     * РЅРѕ Р°РґРґРёС‚РёРІРЅРѕРµ СЃРјРµС€РµРЅРёРµ (ADDITIVE_TRANSPARENCY) вЂ” С†РІРµС‚Р° СЃРєР»Р°РґС‹РІР°СЋС‚СЃСЏ СЃРѕ СЃС†РµРЅРѕР№,
+-     * РёР·-Р·Р° С‡РµРіРѕ РёСЃРєСЂС‹ СЃРІРµС‚СЏС‚СЃСЏ, Р° РЅРµ РїСЂРѕСЃС‚Рѕ РїРµСЂРµРєСЂС‹РІР°СЋС‚ С‚Рѕ, С‡С‚Рѕ Р·Р° РЅРёРјРё.
+-     */
+     public static final RenderType SPARKS = RenderType.create(
+             "aasgranate_sparks",
+             DefaultVertexFormat.POSITION_COLOR,
+             VertexFormat.Mode.QUADS,
+             64 * 1024,
+             false,
+-            false, // Р°РґРґРёС‚РёРІРЅС‹Рј РєРІР°РґР°Рј СЃРѕСЂС‚РёСЂРѕРІРєР° РЅРµ РЅСѓР¶РЅР° вЂ” РїРѕСЂСЏРґРѕРє РЅР° РЅРёС… РЅРµ РІР»РёСЏРµС‚
++            false,
+             RenderType.CompositeState.builder()
+                     .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorShader))
+                     .setTransparencyState(ADDITIVE_TRANSPARENCY)
+--- /dev/null
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeShaders.java
+@@ -0,0 +1,38 @@
++package com.danilfb123.aasgranate.client;
++
++import com.danilfb123.aasgranate.AasGranate;
++import com.mojang.blaze3d.vertex.DefaultVertexFormat;
++import java.io.IOException;
++import net.minecraft.client.renderer.ShaderInstance;
++import net.minecraft.resources.ResourceLocation;
++import net.minecraftforge.api.distmarker.Dist;
++import net.minecraftforge.client.event.RegisterShadersEvent;
++import net.minecraftforge.eventbus.api.SubscribeEvent;
++import net.minecraftforge.fml.common.Mod;
++import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
++
++@Mod.EventBusSubscriber(modid = AasGranate.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
++public final class SmokeShaders {
++    private static ShaderInstance cloud;
++    private static ShaderInstance composite;
++
++    private SmokeShaders() {}
++    static ShaderInstance cloud() { return cloud; }
++    static ShaderInstance composite() { return composite; }
++    static boolean ready() { return cloud != null && composite != null; }
++
++    @SubscribeEvent
++    public static void setup(FMLClientSetupEvent event) {
++        event.enqueueWork(SmokeTransparencyHook::install);
++    }
++
++    @SubscribeEvent
++    public static void register(RegisterShadersEvent event) throws IOException {
++        event.registerShader(new ShaderInstance(event.getResourceProvider(),
++                new ResourceLocation(AasGranate.MOD_ID, "smoke_cloud"),
++                DefaultVertexFormat.POSITION_COLOR_TEX), shader -> cloud = shader);
++        event.registerShader(new ShaderInstance(event.getResourceProvider(),
++                new ResourceLocation(AasGranate.MOD_ID, "smoke_composite"),
++                DefaultVertexFormat.POSITION_TEX), shader -> composite = shader);
++    }
++}
+--- a/src/main/java/com/danilfb123/aasgranate/client/SmokeStageRenderer.java
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeStageRenderer.java
+@@ -3,107 +3,142 @@
+ import com.danilfb123.aasgranate.AasGranate;
+ import com.danilfb123.aasgranate.M18Entity;
+ import com.danilfb123.aasgranate.Rdg2Entity;
++import com.mojang.blaze3d.vertex.BufferBuilder;
+ import com.mojang.blaze3d.vertex.PoseStack;
++import java.util.ArrayList;
++import java.util.LinkedHashSet;
++import java.util.List;
++import java.util.Set;
+ import net.minecraft.client.Minecraft;
+ import net.minecraft.client.multiplayer.ClientLevel;
+ import net.minecraft.client.renderer.MultiBufferSource;
+ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+ import net.minecraft.util.Mth;
+ import net.minecraft.world.entity.Entity;
++import net.minecraft.world.phys.AABB;
+ import net.minecraft.world.phys.Vec3;
+ import net.minecraftforge.api.distmarker.Dist;
+ import net.minecraftforge.client.event.RenderLevelStageEvent;
++import net.minecraftforge.event.TickEvent;
++import net.minecraftforge.event.entity.EntityJoinLevelEvent;
++import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+ import net.minecraftforge.eventbus.api.SubscribeEvent;
+ import net.minecraftforge.fml.common.Mod;
+ 
+-/**
+- * Р РёСЃСѓРµС‚ РґС‹РјРѕРІС‹Рµ РѕР±Р»Р°РєР° Рё РёСЃРєСЂС‹ РґС‹РјРѕРІС‹С… С€Р°С€РµРє РѕС‚РґРµР»СЊРЅС‹Рј РїСЂРѕС…РѕРґРѕРј,
+- * РџРћРЎР›Р• С‚РѕРіРѕ РєР°Рє РґРІРёР¶РѕРє СѓР¶Рµ РѕС‚СЂРёСЃРѕРІР°Р» РІР°РЅРёР»СЊРЅС‹Рµ С‡Р°СЃС‚РёС†С‹
+- * (RenderLevelStageEvent.Stage.AFTER_PARTICLES).
+- *
+- * Р Р°РЅСЊС€Рµ РѕР±Р»Р°РєРѕ/РёСЃРєСЂС‹ СЂРёСЃРѕРІР°Р»РёСЃСЊ РїСЂСЏРјРѕ РІРЅСѓС‚СЂРё EntityRenderer'Р° С€Р°С€РєРё,
+- * С‚Рѕ РµСЃС‚СЊ РІ С„Р°Р·Рµ Entities вЂ” Р”Рћ С„Р°Р·С‹ Particles. Р”С‹Рј СЃРѕСЃС‚РѕРёС‚ РёР·
+- * РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹С… РєРІР°РґРѕРІ Р±РµР· Р·Р°РїРёСЃРё РІ depth-buffer, РїРѕСЌС‚РѕРјСѓ РїРѕСЂСЏРґРѕРє
+- * СЂРёСЃРѕРІР°РЅРёСЏ СЂРµС€Р°РµС‚ РІСЃС‘: РІСЃС‘, С‡С‚Рѕ СЂРёСЃСѓРµС‚СЃСЏ РїРѕР·Р¶Рµ РґС‹РјР°, РѕРєР°Р·С‹РІР°РµС‚СЃСЏ
+- * РІРёРґРЅРѕ "СЃРєРІРѕР·СЊ" РЅРµРіРѕ, РґР°Р¶Рµ РµСЃР»Рё РїРѕ С„Р°РєС‚Сѓ РЅР°С…РѕРґРёС‚СЃСЏ РІРЅСѓС‚СЂРё/Р·Р° РЅРёРј.
+- * РР·-Р·Р° СЌС‚РѕРіРѕ СЃРєРІРѕР·СЊ РґС‹Рј Р±С‹Р»Рё РІРёРґРЅС‹ С‡Р°СЃС‚РёС†С‹ (РѕСЃРєРѕР»РєРё РІР·СЂС‹РІР°, РїС‹Р»СЊ РѕС‚
+- * С€Р°РіРѕРІ Рё С‚.Рї.), РєРѕС‚РѕСЂС‹Рµ СЂРёСЃСѓСЋС‚СЃСЏ РїРѕР·Р¶Рµ, РІ С„Р°Р·Рµ Particles.
+- *
+- * РџРµСЂРµРЅРѕСЃ СЂРёСЃРѕРІР°РЅРёСЏ РґС‹РјР° РЅР° AFTER_PARTICLES СЂРµС€Р°РµС‚ СЌС‚Рѕ: Рє СЌС‚РѕРјСѓ РјРѕРјРµРЅС‚Сѓ
+- * СѓР¶Рµ РѕС‚СЂРёСЃРѕРІР°РЅС‹ Рё С‡Р°СЃС‚РёС†С‹, Рё СЃР°РјРё С€Р°С€РєРё/РІР·СЂС‹РІС‹ (С„Р°Р·Р° Entities РёРґС‘С‚
+- * СЂР°РЅСЊС€Рµ), РїРѕСЌС‚РѕРјСѓ РґС‹Рј РєРѕСЂСЂРµРєС‚РЅРѕ РїРµСЂРµРєСЂС‹РІР°РµС‚ РІСЃС‘ СЌС‚Рѕ РЅР° СЌРєСЂР°РЅРµ.
+- * Depth-test РїСЂРѕС‚РёРІ РЅР°СЃС‚РѕСЏС‰РµР№ РЅРµРїСЂРѕР·СЂР°С‡РЅРѕР№ РіРµРѕРјРµС‚СЂРёРё (СЃС‚РµРЅС‹, Р·РµРјР»СЏ)
+- * РїСЂРѕРґРѕР»Р¶Р°РµС‚ СЂР°Р±РѕС‚Р°С‚СЊ РєР°Рє Рё СЂР°РЅСЊС€Рµ вЂ” РѕРЅР° РїРёС€РµС‚ РіР»СѓР±РёРЅСѓ РІ СЃРІРѕРёС… РѕР±С‹С‡РЅС‹С…
+- * С„Р°Р·Р°С…, РїРѕСЂСЏРґРѕРє РµС‘ СЂРёСЃРѕРІР°РЅРёСЏ РЅРµ РјРµРЅСЏРµС‚СЃСЏ.
+- */
+ @Mod.EventBusSubscriber(modid = AasGranate.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+ public final class SmokeStageRenderer {
++    private static final Set<Entity> CANDIDATES = new LinkedHashSet<>();
++    private static final List<Entity> VISIBLE = new ArrayList<>();
++    private static final MultiBufferSource.BufferSource SPARK_BUFFER =
++            MultiBufferSource.immediate(new BufferBuilder(64 * 1024));
++    private static ClientLevel trackedLevel;
+ 
+     private SmokeStageRenderer() {}
+ 
+     @SubscribeEvent
++    public static void onJoin(EntityJoinLevelEvent event) {
++        if (event.getLevel() == trackedLevel && isSmokeEntity(event.getEntity()))
++            CANDIDATES.add(event.getEntity());
++    }
++
++    @SubscribeEvent
++    public static void onLeave(EntityLeaveLevelEvent event) {
++        CANDIDATES.remove(event.getEntity());
++    }
++
++    @SubscribeEvent
++    public static void onClientTick(TickEvent.ClientTickEvent event) {
++        if (event.phase == TickEvent.Phase.END) trackLevel(Minecraft.getInstance().level);
++    }
++
++    private static void trackLevel(ClientLevel level) {
++        if (level == trackedLevel) return;
++        CANDIDATES.clear();
++        VISIBLE.clear();
++        SmokePipeline.close();
++        trackedLevel = level;
++        if (level != null) for (Entity entity : level.entitiesForRendering())
++            if (isSmokeEntity(entity)) CANDIDATES.add(entity);
++    }
++
++    private static boolean isSmokeEntity(Entity entity) {
++        return entity instanceof Rdg2Entity || entity instanceof M18Entity;
++    }
++
++    @SubscribeEvent
+     public static void onRenderLevelStage(RenderLevelStageEvent event) {
+-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+-
+-        Minecraft mc = Minecraft.getInstance();
+-        ClientLevel level = mc.level;
+-        if (level == null) return;
+-
+-        float partialTick = event.getPartialTick();
+-        Vec3 camPos = event.getCamera().getPosition();
+-        PoseStack poseStack = event.getPoseStack();
+-        MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
+-        EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
+-
+-        boolean drewSomething = false;
+-
+-        for (Entity entity : level.entitiesForRendering()) {
+-            if (entity instanceof Rdg2Entity grenade && grenade.isSmoking()) {
+-                renderRdg2(grenade, partialTick, poseStack, bufferSource, dispatcher, camPos);
+-                drewSomething = true;
+-            } else if (entity instanceof M18Entity grenade && grenade.isSmoking()) {
+-                renderM18(grenade, partialTick, poseStack, bufferSource, dispatcher, camPos);
+-                drewSomething = true;
+-            }
+-        }
+-
+-        // Р”С‹Рј РЅРµ РІС…РѕРґРёС‚ РІ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РЅР°Р±РѕСЂ RenderType'РѕРІ, РєРѕС‚РѕСЂС‹Рµ РІР°РЅРёР»СЊРЅС‹Р№
+-        // СЂРµРЅРґРµСЂ-Р»СѓРї СЃР±СЂР°СЃС‹РІР°РµС‚ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІ РЅСѓР¶РЅС‹Р№ РјРѕРјРµРЅС‚ вЂ” СЃР±СЂР°СЃС‹РІР°РµРј
+-        // СЃР°РјРё, С‡С‚РѕР±С‹ РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅРЅРѕ РЅР°СЂРёСЃРѕРІР°С‚СЊ РµРіРѕ РёРјРµРЅРЅРѕ РЅР° СЌС‚РѕР№ С„Р°Р·Рµ,
+-        // Р° РЅРµ РїРѕР·Р¶Рµ (РЅР°РїСЂРёРјРµСЂ, РІРјРµСЃС‚Рµ СЃ РїРѕРіРѕРґРѕР№).
+-        if (drewSomething) {
+-            bufferSource.endBatch(SmokeRenderTypes.SMOKE);
+-            bufferSource.endBatch(SmokeRenderTypes.SPARKS);
++        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
++            prepare(event);
++        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
++            SmokePipeline.afterParticles();
++        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
++            SmokePipeline.afterLevel();
+         }
+     }
+ 
+-    private static void renderRdg2(Rdg2Entity entity, float partialTick, PoseStack poseStack,
+-                                   MultiBufferSource bufferSource, EntityRenderDispatcher dispatcher,
+-                                   Vec3 camPos) {
+-        double x = Mth.lerp(partialTick, entity.xo, entity.getX());
+-        double y = Mth.lerp(partialTick, entity.yo, entity.getY());
+-        double z = Mth.lerp(partialTick, entity.zo, entity.getZ());
+-        int packedLight = dispatcher.getPackedLightCoords(entity, partialTick);
++    private static void prepare(RenderLevelStageEvent event) {
++        Minecraft mc = Minecraft.getInstance();
++        trackLevel(mc.level);
++        if (mc.level == null || !SmokeShaders.ready()) return;
++        VISIBLE.clear();
++        float partial = event.getPartialTick();
++        for (Entity entity : CANDIDATES) {
++            if (entity.isRemoved()) continue;
++            boolean smoking = entity instanceof Rdg2Entity e
++                    ? e.isSmoking() && e.getSmokeDensity(partial) > 0.002F
++                    : ((M18Entity) entity).isSmoking() && ((M18Entity) entity).getSmokeDensity(partial) > 0.002F;
++            if (smoking && event.getFrustum().isVisible(bounds(entity, partial))) VISIBLE.add(entity);
++        }
++        if (VISIBLE.isEmpty()) return;
+ 
+-        poseStack.pushPose();
+-        poseStack.translate(x - camPos.x, y - camPos.y, z - camPos.z);
+-        SmokeCloudRenderer.render(entity, partialTick, poseStack, bufferSource, packedLight);
+-        SparkRenderer.render(entity, partialTick, poseStack, bufferSource);
+-        poseStack.popPose();
++        PoseStack poses = event.getPoseStack();
++        Vec3 camera = event.getCamera().getPosition();
++        EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
++        BufferBuilder builder = SmokePipeline.begin(event.getProjectionMatrix());
++        MultiBufferSource smoke = type -> builder;
++        for (Entity entity : VISIBLE) {
++            poses.pushPose();
++            try {
++                poses.translate(Mth.lerp(partial, entity.xo, entity.getX()) - camera.x,
++                        Mth.lerp(partial, entity.yo, entity.getY()) - camera.y,
++                        Mth.lerp(partial, entity.zo, entity.getZ()) - camera.z);
++                int light = dispatcher.getPackedLightCoords(entity, partial);
++                if (entity instanceof Rdg2Entity e) {
++                    SmokeCloudRenderer.render(e, partial, poses, smoke, light);
++                    SparkRenderer.render(e, partial, poses, SPARK_BUFFER);
++                } else if (entity instanceof M18Entity e) {
++                    M18SmokeCloudRenderer.render(e, partial, poses, smoke, light);
++                    M18SparkRenderer.render(e, partial, poses, SPARK_BUFFER);
++                }
++            } finally {
++                poses.popPose();
++            }
++        }
++        // Independent buffers: sparks no longer flush a partly built smoke batch.
++        SPARK_BUFFER.endBatch();
++        SmokePipeline.upload();
+     }
+ 
+-    private static void renderM18(M18Entity entity, float partialTick, PoseStack poseStack,
+-                                  MultiBufferSource bufferSource, EntityRenderDispatcher dispatcher,
+-                                  Vec3 camPos) {
+-        double x = Mth.lerp(partialTick, entity.xo, entity.getX());
+-        double y = Mth.lerp(partialTick, entity.yo, entity.getY());
+-        double z = Mth.lerp(partialTick, entity.zo, entity.getZ());
+-        int packedLight = dispatcher.getPackedLightCoords(entity, partialTick);
+-
+-        poseStack.pushPose();
+-        poseStack.translate(x - camPos.x, y - camPos.y, z - camPos.z);
+-        M18SmokeCloudRenderer.render(entity, partialTick, poseStack, bufferSource, packedLight);
+-        M18SparkRenderer.render(entity, partialTick, poseStack, bufferSource);
+-        poseStack.popPose();
++    private static AABB bounds(Entity entity, float partial) {
++        double x = Mth.lerp(partial, entity.xo, entity.getX());
++        double y = Mth.lerp(partial, entity.yo, entity.getY());
++        double z = Mth.lerp(partial, entity.zo, entity.getZ());
++        double radius = entity instanceof Rdg2Entity ? Rdg2Entity.SMOKE_RADIUS : M18Entity.SMOKE_RADIUS;
++        double height = entity instanceof Rdg2Entity ? Rdg2Entity.SMOKE_HEIGHT : M18Entity.SMOKE_HEIGHT;
++        double horizontal = radius * 1.85;
++        double vertical = radius * 0.70;
++        AABB result = new AABB(x - horizontal, y - vertical, z - horizontal,
++                x + horizontal, y + height + vertical, z + horizontal);
++        // A moving grenade can leave its visible trail far outside the grenade's own box.
++        if (entity instanceof Rdg2Entity e) {
++            for (Rdg2Entity.TrailPuff puff : e.getTrail())
++                result = result.minmax(new AABB(puff.x - 2, puff.y - 2, puff.z - 2,
++                        puff.x + 2, puff.y + 2, puff.z + 2));
++        } else if (entity instanceof M18Entity e) {
++            for (M18Entity.TrailPuff puff : e.getTrail())
++                result = result.minmax(new AABB(puff.x - 2, puff.y - 2, puff.z - 2,
++                        puff.x + 2, puff.y + 2, puff.z + 2));
++        }
++        return result;
+     }
+ }
+--- /dev/null
++++ b/src/main/java/com/danilfb123/aasgranate/client/SmokeTransparencyHook.java
+@@ -0,0 +1,48 @@
++package com.danilfb123.aasgranate.client;
++
++import java.lang.reflect.Field;
++import net.minecraft.client.renderer.RenderStateShard;
++import net.minecraft.client.renderer.RenderType;
++import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
++
++/**
++ * Forge 1.20.1 has an AFTER_TRANSLUCENT event, but no BEFORE_TRANSLUCENT event.
++ * Wrap just this RenderType's two state callbacks once, retaining the original callbacks.
++ * The SRG field names are remapped by Forge in both development and installed builds.
++ * No per-frame reflection and no interception of block breaking, entities or other layers.
++ */
++final class SmokeTransparencyHook {
++    private static boolean installed;
++
++    private SmokeTransparencyHook() {}
++
++    static void install() {
++        if (installed) return;
++        RenderType type = RenderType.translucent();
++        Field setup = ObfuscationReflectionHelper.findField(RenderStateShard.class, "f_110131_");
++        Field clear = ObfuscationReflectionHelper.findField(RenderStateShard.class, "f_110132_");
++        try {
++            Runnable originalSetup = (Runnable) setup.get(type);
++            Runnable originalClear = (Runnable) clear.get(type);
++            setup.set(type, (Runnable) () -> {
++                originalSetup.run();
++                SmokePipeline.beginTranslucent();
++            });
++            try {
++                clear.set(type, (Runnable) () -> {
++                    try {
++                        SmokePipeline.endTranslucent();
++                    } finally {
++                        originalClear.run();
++                    }
++                });
++            } catch (IllegalAccessException e) {
++                setup.set(type, originalSetup);
++                throw e;
++            }
++            installed = true;
++        } catch (IllegalAccessException e) {
++            throw new IllegalStateException("Cannot install aasgranate smoke transparency for Forge 1.20.1", e);
++        }
++    }
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_cloud.fsh
+@@ -0,0 +1,29 @@
++#version 150
++
++uniform sampler2D GlassDepth;
++uniform sampler2D OpaqueDepth;
++uniform int Pass;
++uniform int UseOpaqueDepth;
++uniform vec4 ColorModulator;
++in vec4 vertexColor;
++in vec2 puffCoord;
++out vec4 fragColor;
++
++void main() {
++    vec2 p = abs(puffCoord);
++    // Distance within the original eight-sided disk, not a replacement circular texture.
++    float edge = max(p.x + 0.41421356237 * p.y, p.y + 0.41421356237 * p.x);
++    float coverage = clamp((1.0 - edge) / 0.40, 0.0, 1.0);
++    if (coverage <= 0.0) discard;
++
++    ivec2 pixel = ivec2(gl_FragCoord.xy);
++    if (Pass != 0) {
++        float glass = texelFetch(GlassDepth, pixel, 0).r;
++        bool behind = gl_FragCoord.z > glass;
++        if ((Pass == 1 && !behind) || (Pass == 2 && behind)) discard;
++    }
++    // Fabulous clears main depth during its final composite; use the saved opaque depth.
++    if (UseOpaqueDepth != 0 && gl_FragCoord.z > texelFetch(OpaqueDepth, pixel, 0).r) discard;
++    fragColor = vertexColor * ColorModulator;
++    fragColor.a *= coverage;
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_cloud.json
+@@ -0,0 +1,99 @@
++{
++  "blend": {
++    "func": "add",
++    "srcrgb": "srcalpha",
++    "dstrgb": "1-srcalpha",
++    "srcalpha": "1",
++    "dstalpha": "1-srcalpha"
++  },
++  "vertex": "aasgranate:smoke_cloud",
++  "fragment": "aasgranate:smoke_cloud",
++  "attributes": [
++    "Position",
++    "Color",
++    "UV0"
++  ],
++  "samplers": [
++    {
++      "name": "GlassDepth"
++    },
++    {
++      "name": "OpaqueDepth"
++    }
++  ],
++  "uniforms": [
++    {
++      "name": "ModelViewMat",
++      "type": "matrix4x4",
++      "count": 16,
++      "values": [
++        1,
++        0,
++        0,
++        0,
++        0,
++        1,
++        0,
++        0,
++        0,
++        0,
++        1,
++        0,
++        0,
++        0,
++        0,
++        1
++      ]
++    },
++    {
++      "name": "ProjMat",
++      "type": "matrix4x4",
++      "count": 16,
++      "values": [
++        1,
++        0,
++        0,
++        0,
++        0,
++        1,
++        0,
++        0,
++        0,
++        0,
++        1,
++        0,
++        0,
++        0,
++        0,
++        1
++      ]
++    },
++    {
++      "name": "ColorModulator",
++      "type": "float",
++      "count": 4,
++      "values": [
++        1,
++        1,
++        1,
++        1
++      ]
++    },
++    {
++      "name": "Pass",
++      "type": "int",
++      "count": 1,
++      "values": [
++        0
++      ]
++    },
++    {
++      "name": "UseOpaqueDepth",
++      "type": "int",
++      "count": 1,
++      "values": [
++        0
++      ]
++    }
++  ]
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_cloud.vsh
+@@ -0,0 +1,15 @@
++#version 150
++
++in vec3 Position;
++in vec4 Color;
++in vec2 UV0;
++uniform mat4 ModelViewMat;
++uniform mat4 ProjMat;
++out vec4 vertexColor;
++out vec2 puffCoord;
++
++void main() {
++    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
++    vertexColor = Color;
++    puffCoord = UV0;
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_composite.fsh
+@@ -0,0 +1,10 @@
++#version 150
++
++uniform sampler2D GlassColor;
++in vec2 texCoord;
++out vec4 fragColor;
++
++void main() {
++    // Already premultiplied by vanilla's blend into the transparent black target.
++    fragColor = texture(GlassColor, texCoord);
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_composite.json
+@@ -0,0 +1,21 @@
++{
++  "blend": {
++    "func": "add",
++    "srcrgb": "1",
++    "dstrgb": "1-srcalpha",
++    "srcalpha": "1",
++    "dstalpha": "1-srcalpha"
++  },
++  "vertex": "aasgranate:smoke_composite",
++  "fragment": "aasgranate:smoke_composite",
++  "attributes": [
++    "Position",
++    "UV0"
++  ],
++  "samplers": [
++    {
++      "name": "GlassColor"
++    }
++  ],
++  "uniforms": []
++}
+--- /dev/null
++++ b/src/main/resources/assets/aasgranate/shaders/core/smoke_composite.vsh
+@@ -0,0 +1,10 @@
++#version 150
++
++in vec3 Position;
++in vec2 UV0;
++out vec2 texCoord;
++
++void main() {
++    gl_Position = vec4(Position, 1.0);
++    texCoord = UV0;
++}

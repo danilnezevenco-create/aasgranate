@@ -1,0 +1,194 @@
+{
+  "rgd5_pin_pull": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_pin_pull",
+        "stream": false
+      }
+    ]
+  },
+  "rgd5_throw": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_throw",
+        "stream": false
+      }
+    ]
+  },
+  "rgd5_blast_close": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_blast_close",
+        "stream": false
+      }
+    ]
+  },
+  "rgd5_blast_mid": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_blast_mid",
+        "stream": false
+      }
+    ]
+  },
+  "rgd5_blast_far": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_blast_far",
+        "stream": false
+      }
+    ]
+  },
+  "rgd5_blast_distant": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgd5_blast_distant",
+        "stream": true
+      }
+    ]
+  },
+  "m_67_pin_pull": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_pin_pull",
+        "stream": false
+      }
+    ]
+  },
+  "m_67_throw": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_throw",
+        "stream": false
+      }
+    ]
+  },
+  "m_67_blast_close": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_blast_close",
+        "stream": false
+      }
+    ]
+  },
+  "m_67_blast_mid": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_blast_mid",
+        "stream": false
+      }
+    ]
+  },
+  "m_67_blast_far": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_blast_far",
+        "stream": false
+      }
+    ]
+  },
+  "m_67_blast_distant": {
+    "sounds": [
+      {
+        "name": "aasgranate:m_67_blast_distant",
+        "stream": true
+      }
+    ]
+  },
+  "rgo_pin_pull": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_pin_pull",
+        "stream": false
+      }
+    ]
+  },
+  "rgo_throw": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_throw",
+        "stream": false
+      }
+    ]
+  },
+  "rgo_blast_close": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_blast_close",
+        "stream": false
+      }
+    ]
+  },
+  "rgo_blast_mid": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_blast_mid",
+        "stream": false
+      }
+    ]
+  },
+  "rgo_blast_far": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_blast_far",
+        "stream": false
+      }
+    ]
+  },
+  "rgo_blast_distant": {
+    "sounds": [
+      {
+        "name": "aasgranate:rgo_blast_distant",
+        "stream": true
+      }
+    ]
+  },
+  "rdg2_pin_pull": {
+    "sounds": [
+      {
+        "name": "aasgranate:rdg2_pin_pull",
+        "stream": false
+      }
+    ]
+  },
+  "rdg2_throw": {
+    "sounds": [
+      {
+        "name": "aasgranate:rdg2_throw",
+        "stream": false
+      }
+    ]
+  },
+  "rdg2_smoke_loop": {
+    "sounds": [
+      {
+        "name": "aasgranate:rdg2_smoke_loop",
+        "stream": false
+      }
+    ]
+  },
+  "m18_pin_pull": {
+    "sounds": [
+      {
+        "name": "aasgranate:m18_pin_pull",
+        "stream": false
+      }
+    ]
+  },
+  "m18_throw": {
+    "sounds": [
+      {
+        "name": "aasgranate:m18_throw",
+        "stream": false
+      }
+    ]
+  },
+  "m18_smoke_loop": {
+    "sounds": [
+      {
+        "name": "aasgranate:m18_smoke_loop",
+        "stream": false
+      }
+    ]
+  }
+}
