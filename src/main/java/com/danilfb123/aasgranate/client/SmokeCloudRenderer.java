@@ -39,7 +39,9 @@ public final class SmokeCloudRenderer {
         int blockLight = LightTexture.block(packedLight);
         int skyLight   = LightTexture.sky(packedLight);
         float lum = Math.max(blockLight, skyLight) / 15.0F;
-        float bright = 0.30F + 0.70F * lum;
+        // Локальный свет и высота солнца: ночью дым не должен быть белым пятном на чёрной карте.
+        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient();
+        float tint = 1.0F - 0.10F * SmokeTimeOfDay.coolTint();   // было 0.25F   // ночью дополнительно темнее, без цветового сдвига
 
         Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
@@ -48,7 +50,7 @@ public final class SmokeCloudRenderer {
         VertexConsumer vc = bufferSource.getBuffer(SmokeRenderTypes.SMOKE);
         Matrix4f pose = poseStack.last().pose();
 
-        renderTrail(entity, partialTick, vc, pose, right, up, bright);
+        renderTrail(entity, partialTick, vc, pose, right, up, bright, tint);
 
         float growth = entity.getSmokeGrowth(partialTick);
         float inv = 1.0F - growth;
@@ -81,9 +83,9 @@ public final class SmokeCloudRenderer {
             float puffR = sizeVar * radius * 0.62F * (0.9F + 0.1F * sin(t * 0.02F + p2));
 
             float grey = (BASE_GREY + greyVar) * bright;
-            int cr = clamp255(grey * 255.0F);
-            int cg = clamp255(grey * 255.0F);
-            int cb = clamp255((grey * 0.99F) * 255.0F);
+            int cr = clamp255(grey * tint * 255.0F);
+            int cg = cr;
+            int cb = cr;                                             // раньше было grey * 0.99F: из-за этого шёл синий оттенок
             int ca = clamp255(alpha * 255.0F);
             if (ca <= 0) continue;
 
@@ -91,9 +93,9 @@ public final class SmokeCloudRenderer {
         }
     }
 
-    private static void renderTrail(Rdg2Entity entity, float partialTick,
-                                    VertexConsumer vc, Matrix4f pose,
-                                    Vector3f right, Vector3f up, float bright) {
+    private static void renderTrail(Rdg2Entity entity, float partialTick, VertexConsumer vc,
+                                    Matrix4f pose, Vector3f right, Vector3f up,
+                                    float bright, float tint) {
 
         double ex = Mth.lerp(partialTick, entity.xo, entity.getX());
         double ey = Mth.lerp(partialTick, entity.yo, entity.getY());
@@ -126,7 +128,7 @@ public final class SmokeCloudRenderer {
                 float greyVar = (hash(s + 4) - 0.5F) * 0.10F;
                 float grey = (BASE_GREY + greyVar) * bright;
 
-                int cr = clamp255(grey * 255.0F);
+                int cr = clamp255(grey * tint * 255.0F);
                 int ca = clamp255(alphaBase * (0.7F + 0.6F * hash(s + 5)) * 255.0F);
                 if (ca <= 0) continue;
 

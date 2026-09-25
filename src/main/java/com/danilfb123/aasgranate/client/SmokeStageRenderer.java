@@ -32,7 +32,8 @@ public final class SmokeStageRenderer {
     private static final MultiBufferSource.BufferSource SPARK_BUFFER =
             MultiBufferSource.immediate(new BufferBuilder(64 * 1024));
     private static ClientLevel trackedLevel;
-
+    private static final MultiBufferSource.BufferSource SHADER_BUFFER =
+            MultiBufferSource.immediate(new BufferBuilder(256 * 1024));
     private SmokeStageRenderer() {}
 
     @SubscribeEvent
@@ -94,8 +95,19 @@ public final class SmokeStageRenderer {
         PoseStack poses = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
         EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-        BufferBuilder builder = SmokePipeline.begin(event.getProjectionMatrix());
-        MultiBufferSource smoke = type -> builder;
+
+        boolean shaders = IrisCompat.shadersActive();
+        SmokeBillboard.shaderMode = shaders;
+        if (shaders) SmokePuffTexture.ensure();
+        BufferBuilder builder = shaders ? null : SmokePipeline.begin(event.getProjectionMatrix());
+
+        SmokeTimeOfDay.update(mc.level, partial);
+        if (shaders) SmokeTimeOfDay.neutral();
+
+        MultiBufferSource smoke = shaders
+                ? type -> SHADER_BUFFER.getBuffer(SmokeRenderTypes.SMOKE_SHADERS)
+                : type -> builder;
+
         for (Entity entity : VISIBLE) {
             poses.pushPose();
             try {
@@ -103,6 +115,7 @@ public final class SmokeStageRenderer {
                         Mth.lerp(partial, entity.yo, entity.getY()) - camera.y,
                         Mth.lerp(partial, entity.zo, entity.getZ()) - camera.z);
                 int light = dispatcher.getPackedLightCoords(entity, partial);
+                SmokeBillboard.light = light;
                 if (entity instanceof Rdg2Entity e) {
                     SmokeCloudRenderer.render(e, partial, poses, smoke, light);
                     SparkRenderer.render(e, partial, poses, SPARK_BUFFER);
@@ -114,9 +127,10 @@ public final class SmokeStageRenderer {
                 poses.popPose();
             }
         }
-        // Independent buffers: sparks no longer flush a partly built smoke batch.
+
+        if (shaders) SHADER_BUFFER.endBatch(SmokeRenderTypes.SMOKE_SHADERS);
+        else SmokePipeline.upload();
         SPARK_BUFFER.endBatch();
-        SmokePipeline.upload();
     }
 
     private static AABB bounds(Entity entity, float partial) {

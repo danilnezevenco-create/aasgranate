@@ -132,42 +132,6 @@ public interface SmokeCloudEmitter {
 }
 
 ==========================================
-FILE: AasSmokeSourceRenderer.java
-PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\AasSmokeSourceRenderer.java
-==========================================
-package com.danilfb123.aasgranate.client;
-
-import com.danilfb123.aasgranate.AasSmokeSourceEntity;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-
-/**
- * AasSmokeSourceEntity вЂ” С‡РёСЃС‚Рѕ РјР°СЂРєРµСЂ (РїРѕР·РёС†РёСЏ + РїР°СЂР°РјРµС‚СЂС‹), СЃР°Рј СЃРµР±СЏ РЅРµ
- * СЂРёСЃСѓРµС‚ РѕР±С‹С‡РЅС‹Рј EntityRenderer'РѕРј. Р РµР°Р»СЊРЅРѕРµ РѕР±Р»Р°РєРѕ СЂРёСЃСѓРµС‚ SmokeStageRenderer
- * С‡РµСЂРµР· GenericSmokeCloudRenderer РѕС‚РґРµР»СЊРЅС‹Рј РїСЂРѕС…РѕРґРѕРј (РєР°Рє Рё Сѓ M18/RDG-2).
- * Forge РІСЃС‘ СЂР°РІРЅРѕ С‚СЂРµР±СѓРµС‚ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊ renderer РґР»СЏ С‚РёРїР° СЃСѓС‰РЅРѕСЃС‚Рё вЂ”
- * РІРѕС‚ СЌС‚РѕС‚, РїСѓСЃС‚РѕР№.
- */
-public class AasSmokeSourceRenderer extends EntityRenderer<AasSmokeSourceEntity> {
-
-    public AasSmokeSourceRenderer(EntityRendererProvider.Context context) {
-        super(context);
-    }
-
-    @Override
-    public ResourceLocation getTextureLocation(AasSmokeSourceEntity entity) {
-        return null;
-    }
-
-    @Override
-    public boolean shouldRender(AasSmokeSourceEntity entity, net.minecraft.client.renderer.culling.Frustum frustum,
-            double camX, double camY, double camZ) {
-        return false; // РќРёС‡РµРіРѕ РЅРµ СЂРёСЃСѓРµС‚ РЅР°РїСЂСЏРјСѓСЋ; SmokeStageRenderer СЃР°Рј РЅР°С…РѕРґРёС‚ СЌС‚Сѓ СЃСѓС‰РЅРѕСЃС‚СЊ РїРѕ РёРЅС‚РµСЂС„РµР№СЃСѓ.
-    }
-}
-
-==========================================
 FILE: ClientHitboxDebugTracker.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\ClientHitboxDebugTracker.java
 ==========================================
@@ -220,123 +184,81 @@ public class ClientHitboxDebugTracker {
 }
 
 ==========================================
-FILE: GenericSmokeCloudRenderer.java
-PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\GenericSmokeCloudRenderer.java
+FILE: IrisCompat.java
+PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\IrisCompat.java
 ==========================================
 package com.danilfb123.aasgranate.client;
 
-import com.danilfb123.aasgranate.api.SmokeCloudEmitter;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.entity.Entity;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import java.lang.reflect.Method;
 
 /**
- * РўРѕ Р¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ SmokeCloudRenderer/M18SmokeCloudRenderer, РЅРѕ СЂР°Р±РѕС‚Р°РµС‚
- * СЃ Р›Р®Р‘РћР™ СЃСѓС‰РЅРѕСЃС‚СЊСЋ, РєРѕС‚РѕСЂР°СЏ СЂРµР°Р»РёР·СѓРµС‚ SmokeCloudEmitter, Р° РЅРµ С‚РѕР»СЊРєРѕ СЃ
- * РєРѕРЅРєСЂРµС‚РЅС‹РјРё РєР»Р°СЃСЃР°РјРё РіСЂР°РЅР°С‚. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ AasSmokeSourceEntity
- * (СЃРј. api.AasSmokeApi), С‚.Рµ. РґР»СЏ РґС‹РјР°, Р·Р°РїСѓСЃРєР°РµРјРѕРіРѕ СЃС‚РѕСЂРѕРЅРЅРёРјРё РјРѕРґР°РјРё.
- *
- * РџСѓС„РѕРІ Рё С€РµР№РґРµСЂР°/Р±СѓС„РµСЂР° вЂ” СЃС‚РѕР»СЊРєРѕ Р¶Рµ Рё С‚Рµ Р¶Рµ СЃР°РјС‹Рµ (SmokePuffCache,
- * SmokeRenderTypes, SmokeBillboard), РїРѕСЌС‚РѕРјСѓ РґС‹Рј РІС‹РіР»СЏРґРёС‚ РёРґРµРЅС‚РёС‡РЅРѕ
- * РґС‹РјРѕРІС‹Рј С€Р°С€РєР°Рј, С‚РѕР»СЊРєРѕ Р±РµР· С…РІРѕСЃС‚Р° РІ РїРѕР»С‘С‚Рµ Рё Р±РµР· РёСЃРєСЂ (СЌС‚Рѕ Сѓ СЃР°РјРѕР№
- * С€Р°С€РєРё, Р° РЅРµ Сѓ РѕР±С‰РµРіРѕ РёСЃС‚РѕС‡РЅРёРєР° РґС‹РјР°).
+ * РћРїСЂРµРґРµР»СЏРµС‚, Р°РєС‚РёРІРЅС‹ Р»Рё СЃРµР№С‡Р°СЃ Iris / OptiFine С€РµР№РґРµСЂС‹, Р±РµР· Р¶С‘СЃС‚РєРѕР№
+ * Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РЅРёС…. РџСЂРё Р°РєС‚РёРІРЅС‹С… С€РµР№РґРµСЂР°С… РјРёСЂ СЂРёСЃСѓРµС‚СЃСЏ РІРѕ РІРЅСѓС‚СЂРµРЅРЅСЋСЋ
+ * С†РµР»СЊ С€РµР№РґРµСЂ-РјРѕРґР°, Р° РµРіРѕ С„РёРЅР°Р»СЊРЅС‹Р№ РєРѕРјРїРѕР·РёС‚ РџР•Р Р•Р—РђРџРРЎР«Р’РђР•Рў РіР»Р°РІРЅС‹Р№
+ * С„СЂРµР№РјР±СѓС„РµСЂ РїРѕСЃР»Рµ RenderLevelStageEvent вЂ” РїРѕСЌС‚РѕРјСѓ РґС‹Рј РјРѕР¶РЅРѕ СЂРёСЃРѕРІР°С‚СЊ
+ * С‚РѕР»СЊРєРѕ "РІ С‚Рѕ, С‡С‚Рѕ РїСЂРёРІСЏР·Р°РЅРѕ СЃРµР№С‡Р°СЃ", РЅРµ С‚СЂРѕРіР°СЏ mainRenderTarget.
  */
-public final class GenericSmokeCloudRenderer {
+final class IrisCompat {
 
-    private GenericSmokeCloudRenderer() {}
+    private static final Object IRIS_API = findIrisApi();
+    private static final Method IRIS_IN_USE = findIrisMethod();
+    private static final Method OPTIFINE_SHADERS = findOptifineMethod();
 
-    private static final int PUFF_COUNT = 260;
-    private static final float PUFF_ALPHA = 0.30F;
-    private static final float BASE_GREY = 0.58F;
+    private static long lastCheck;
+    private static boolean cached;
 
-    public static <T extends Entity & SmokeCloudEmitter> void render(T entity, float partialTick,
-            PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+    private IrisCompat() {}
 
-        float density = entity.getSmokeDensity(partialTick);
-        if (density <= 0.002F) return;
+    static boolean shadersActive() {
+        long now = System.nanoTime();
+        if (now - lastCheck > 500_000_000L) { // РЅРµ С‡Р°С‰Рµ 2 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ
+            cached = compute();
+            lastCheck = now;
+        }
+        return cached;
+    }
 
-        float t = entity.getSmokeTicks(partialTick);
-        if (t < 0.0F) return;
+    private static boolean compute() {
+        if (IRIS_IN_USE != null) {
+            try {
+                return (boolean) IRIS_IN_USE.invoke(IRIS_API);
+            } catch (ReflectiveOperationException ignored) {}
+        }
+        if (OPTIFINE_SHADERS != null) {
+            try {
+                return (boolean) OPTIFINE_SHADERS.invoke(null);
+            } catch (ReflectiveOperationException ignored) {}
+        }
+        return false;
+    }
 
-        int blockLight = LightTexture.block(packedLight);
-        int skyLight = LightTexture.sky(packedLight);
-        float lum = Math.max(blockLight, skyLight) / 15.0F;
-        float bright = 0.30F + 0.70F * lum;
-
-        Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
-        Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
-        Vector3f up = camera.transform(new Vector3f(0.0F, 1.0F, 0.0F));
-
-        VertexConsumer vc = bufferSource.getBuffer(SmokeRenderTypes.SMOKE);
-        Matrix4f pose = poseStack.last().pose();
-
-        float growth = entity.getSmokeGrowth(partialTick);
-        float inv = 1.0F - growth;
-        float ease = 1.0F - inv * inv * inv;
-
-        float radius = entity.getSmokeRadius() * (0.12F + 0.88F * ease);
-        float height = entity.getSmokeHeight() * (0.15F + 0.85F * ease);
-
-        SmokePuffCache.Puff[] puffs = SmokePuffCache.get(entity, PUFF_COUNT);
-
-        for (int i = 0; i < PUFF_COUNT; i++) {
-            SmokePuffCache.Puff puff = puffs[i];
-            float alpha = PUFF_ALPHA * puff.alphaFactor * density;
-            if (alpha <= 0.002F) continue;
-            float azimuth = puff.azimuth, rFrac = puff.rFrac, yFrac = puff.yFrac;
-            float sizeVar = puff.sizeVar, spin = puff.spin;
-            float p1 = puff.p1, p2 = puff.p2, p3 = puff.p3;
-            float greyVar = puff.greyVar;
-
-            float ang = azimuth + t * spin;
-            float rr = rFrac * radius * (0.92F + 0.08F * sin(t * 0.010F + p1));
-
-            float px = cos(ang) * rr + sin(t * 0.017F + p2) * 0.10F * radius;
-            float pz = sin(ang) * rr + cos(t * 0.013F + p3) * 0.10F * radius;
-            float py = 0.10F + yFrac * height + sin(t * 0.011F + p1) * 0.06F * height;
-
-            if (py < 0.05F) py = 0.05F;
-            if (py > height) py = height;
-
-            float puffR = sizeVar * radius * 0.62F * (0.9F + 0.1F * sin(t * 0.02F + p2));
-
-            float grey = (BASE_GREY + greyVar) * bright;
-            int cr = clamp255(grey * 255.0F);
-            int cg = clamp255(grey * 255.0F);
-            int cb = clamp255((grey * 0.99F) * 255.0F);
-            int ca = clamp255(alpha * 255.0F);
-            if (ca <= 0) continue;
-
-            SmokeBillboard.draw(vc, pose, right, up, px, py, pz, puffR, cr, cg, cb, ca);
+    private static Object findIrisApi() {
+        try {
+            Class<?> api = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            return api.getMethod("getInstance").invoke(null);
+        } catch (ReflectiveOperationException e) {
+            return null; // Iris РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ вЂ” СЌС‚Рѕ РЅРѕСЂРјР°
         }
     }
 
-    private static float hash(int seed) {
-        int h = seed * 0x27D4EB2D;
-        h ^= h >>> 15;
-        h *= 0x85EBCA6B;
-        h ^= h >>> 13;
-        h *= 0xC2B2AE35;
-        h ^= h >>> 16;
-        return (h >>> 8) / (float) (1 << 24);
+    private static Method findIrisMethod() {
+        if (IRIS_API == null) return null;
+        try {
+            return IRIS_API.getClass().getMethod("isShaderPackInUse");
+        } catch (ReflectiveOperationException e) {
+            return null;
+        }
     }
 
-    private static float sin(float a) { return (float) Math.sin(a); }
-    private static float cos(float a) { return (float) Math.cos(a); }
-
-    private static int clamp255(float v) {
-        int i = (int) v;
-        if (i < 0) return 0;
-        return Math.min(i, 255);
+    private static Method findOptifineMethod() {
+        try {
+            Class<?> config = Class.forName("net.optifine.Config");
+            return config.getMethod("isShaders");
+        } catch (ReflectiveOperationException e) {
+            return null; // OptiFine РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ
+        }
     }
 }
-
 ==========================================
 FILE: M18ClientSound.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\M18ClientSound.java
@@ -1494,7 +1416,12 @@ public final class SmokeCloudRenderer {
         int blockLight = LightTexture.block(packedLight);
         int skyLight   = LightTexture.sky(packedLight);
         float lum = Math.max(blockLight, skyLight) / 15.0F;
-        float bright = 0.30F + 0.70F * lum;
+        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient();
+        float tint = 1.0F - 0.18F * SmokeTimeOfDay.coolTint();
+        // Р›РѕРєР°Р»СЊРЅС‹Р№ СЃРІРµС‚ Р РІС‹СЃРѕС‚Р° СЃРѕР»РЅС†Р°: СЂР°РЅСЊС€Рµ РґС‹Рј Р·РЅР°Р» С‚РѕР»СЊРєРѕ РїСЂРѕ СЃРІРµС‚
+        // РІ СЃРІРѕРµР№ С‚РѕС‡РєРµ, РїРѕСЌС‚РѕРјСѓ РЅРѕС‡СЊСЋ СЃС‚РѕСЏР» Р±РµР»С‹Рј РїСЏС‚РЅРѕРј РЅР° С‡С‘СЂРЅРѕР№ РєР°СЂС‚Рµ.
+        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient();
+        float tint = 1.0F - 0.18F * SmokeTimeOfDay.coolTint();
 
         Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
@@ -1536,8 +1463,8 @@ public final class SmokeCloudRenderer {
             float puffR = sizeVar * radius * 0.62F * (0.9F + 0.1F * sin(t * 0.02F + p2));
 
             float grey = (BASE_GREY + greyVar) * bright;
-            int cr = clamp255(grey * 255.0F);
-            int cg = clamp255(grey * 255.0F);
+            int cr = clamp255(grey * tint * 255.0F);
+            int cg = clamp255(grey * tint * 255.0F);
             int cb = clamp255((grey * 0.99F) * 255.0F);
             int ca = clamp255(alpha * 255.0F);
             if (ca <= 0) continue;
@@ -1546,9 +1473,9 @@ public final class SmokeCloudRenderer {
         }
     }
 
-    private static void renderTrail(Rdg2Entity entity, float partialTick,
-                                    VertexConsumer vc, Matrix4f pose,
-                                    Vector3f right, Vector3f up, float bright) {
+    private static void renderTrail(Rdg2Entity entity, float partialTick, VertexConsumer vc,
+                                    Matrix4f pose, Vector3f right, Vector3f up,
+                                    float bright, float tint) {
 
         double ex = Mth.lerp(partialTick, entity.xo, entity.getX());
         double ey = Mth.lerp(partialTick, entity.yo, entity.getY());
@@ -1581,7 +1508,7 @@ public final class SmokeCloudRenderer {
                 float greyVar = (hash(s + 4) - 0.5F) * 0.10F;
                 float grey = (BASE_GREY + greyVar) * bright;
 
-                int cr = clamp255(grey * 255.0F);
+                int cr = clamp255(grey * tint * 255.0F);
                 int ca = clamp255(alphaBase * (0.7F + 0.6F * hash(s + 5)) * 255.0F);
                 if (ca <= 0) continue;
 
@@ -1645,6 +1572,7 @@ final class SmokePipeline {
     private static RenderTarget opaqueDepth;
     private static RenderTarget activeGlass;
     private static boolean pending, captured, capturing, fabulous;
+    private static boolean shaderPack; // Iris/OptiFine СЂРёСЃСѓСЋС‚ РјРёСЂ РІ СЃРІРѕСЋ С†РµР»СЊ
     private static int nesting;
 
     private SmokePipeline() {}
@@ -1654,6 +1582,7 @@ final class SmokePipeline {
         nesting = 0;
         activeGlass = null;
         fabulous = Minecraft.useShaderTransparency();
+        shaderPack = IrisCompat.shadersActive();
         MODEL_VIEW.set(RenderSystem.getModelViewMatrix());
         PROJECTION.set(projection);
         BUILDER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -1678,7 +1607,8 @@ final class SmokePipeline {
     }
 
     static void beginTranslucent() {
-        if (!pending || captured) return;
+        // РЁРµР№РґРµСЂС‹: РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°РµРј translucent-С†РµР»СЊ вЂ” РµСЋ РІР»Р°РґРµРµС‚ Iris.
+        if (!pending || captured || shaderPack) return;
         if (capturing) { nesting++; return; }
         Minecraft mc = Minecraft.getInstance();
         RenderTarget main = mc.getMainRenderTarget();
@@ -1700,7 +1630,7 @@ final class SmokePipeline {
     }
 
     static void endTranslucent() {
-        if (!capturing) return;
+        if (!capturing || shaderPack) return;
         if (nesting > 0) { nesting--; return; }
         capturing = false;
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
@@ -1718,15 +1648,34 @@ final class SmokePipeline {
     }
 
     static void afterParticles() {
-        // If a third-party renderer bypasses the wrapped RenderType, draw before the
-        // Fabulous composite clears opaque depth. The fallback must not reveal smoke
-        // through solid walls (its glass ordering remains that renderer's limitation).
+        // РџР Р РЁР•Р™Р”Р•Р РђРҐ: РґС‹Рј СЂРёСЃСѓРµРј РїСЂСЏРјРѕ РІ С†РµР»СЊ, РєРѕС‚РѕСЂСѓСЋ Iris РґРµСЂР¶РёС‚
+        // РїСЂРёРІСЏР·Р°РЅРЅРѕР№ РЅР° СЃС‚Р°РґРёРё AFTER_PARTICLES. Iris-РєРѕРјРїРѕР·РёС‚ РїСЂРѕР№РґС‘С‚
+        // РџРћРЎР›Р• вЂ” Рё РґС‹Рј РѕРєР°Р¶РµС‚СЃСЏ Р’РќРЈРўР Р РєР°РґСЂР°, Р° РЅРµ РїРѕРґ РЅРёРј.
+        if (shaderPack) {
+            if (pending) finishInPlace();
+            return;
+        }
         if (pending && (!fabulous || !captured)) finish();
     }
 
     static void afterLevel() {
-        // Also covers renderers which omit the usual terrain-layer callback.
+        if (shaderPack) {
+            if (pending) finishInPlace(); // РїРѕРґСЃС‚СЂР°С…РѕРІРєР°: AFTER_PARTICLES РЅРµ fired
+            return;
+        }
         if (pending) finish();
+    }
+
+    /** РЁРµР№РґРµСЂ-СЂРµР¶РёРј: СЂРёСЃСѓРµРј РІ С‚РµРєСѓС‰Рµ РїСЂРёРІСЏР·Р°РЅРЅСѓСЋ С†РµР»СЊ СЃ РѕР±С‹С‡РЅС‹Рј С‚РµСЃС‚РѕРј
+     *  РіР»СѓР±РёРЅС‹ (РіР»СѓР±РёРЅР° СЃС†РµРЅС‹ Iris СѓР¶Рµ Р»РµР¶РёС‚ РІ РµС‘ depth-Р±СѓС„РµСЂРµ). Р‘РµР·
+     *  bindWrite(main) вЂ” РёРјРµРЅРЅРѕ РѕРЅ СЂР°РЅСЊС€Рµ СѓРЅРѕСЃРёР» РґС‹Рј "РїРѕРґ" РєРѕРјРїРѕР·РёС‚. */
+    private static void finishInPlace() {
+        try {
+            draw(0, false); // Pass 0: РїРѕР·Р°РґРё СЃС‚РµРєР»Р° РЅРµ РЅСѓР¶РЅРѕ, UseOpaqueDepth = 0
+        } finally {
+            pending = false;
+            activeGlass = null;
+        }
     }
 
     private static void finish() {
@@ -1901,7 +1850,7 @@ public class SmokeRenderTypes extends RenderType {
             512 * 1024,
             false,
             true,
-            RenderType.CompositeState.builder()
+            CompositeState.builder()
                     .setShaderState(new ShaderStateShard(SmokeShaders::cloud))
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setCullState(NO_CULL)
@@ -1918,7 +1867,7 @@ public class SmokeRenderTypes extends RenderType {
             64 * 1024,
             false,
             false,
-            RenderType.CompositeState.builder()
+            CompositeState.builder()
                     .setShaderState(new ShaderStateShard(GameRenderer::getPositionColorShader))
                     .setTransparencyState(ADDITIVE_TRANSPARENCY)
                     .setCullState(NO_CULL)
@@ -1978,10 +1927,8 @@ PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgran
 package com.danilfb123.aasgranate.client;
 
 import com.danilfb123.aasgranate.AasGranate;
-import com.danilfb123.aasgranate.AasSmokeSourceEntity;
 import com.danilfb123.aasgranate.M18Entity;
 import com.danilfb123.aasgranate.Rdg2Entity;
-import com.danilfb123.aasgranate.api.SmokeCloudEmitter;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
@@ -2004,14 +1951,6 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/**
- * Р РёСЃСѓРµС‚ РѕР±СЉС‘РјРЅС‹Р№ РґС‹Рј РґР»СЏ Р›Р®Р‘РћР™ СЃСѓС‰РЅРѕСЃС‚Рё, СЂРµР°Р»РёР·СѓСЋС‰РµР№ SmokeCloudEmitter вЂ”
- * РЅРµ С‚РѕР»СЊРєРѕ РіСЂР°РЅР°С‚ СЌС‚РѕРіРѕ РјРѕРґР° (Rdg2Entity/M18Entity), РЅРѕ Рё, РЅР°РїСЂРёРјРµСЂ,
- * AasSmokeSourceEntity, РєРѕС‚РѕСЂСѓСЋ С‡РµСЂРµР· api.AasSmokeApi РјРѕР¶РµС‚ Р·Р°СЃРїР°РІРЅРёС‚СЊ
- * РґСЂСѓРіРѕР№ РјРѕРґ (РґС‹РјРѕРіРµРЅРµСЂР°С‚РѕСЂ С‚РµС…РЅРёРєРё, РґС‹РјРѕРІС‹Рµ С€Р°С€РєРё СЃРѕ СЃС‚РѕСЂРѕРЅРЅРёС… РіСЂР°РЅР°С‚РѕРјС‘С‚РѕРІ
- * Рё С‚.Рї.). РРјРµРЅРЅРѕ СЌС‚Р° СЂР°Р·РІСЏР·РєР° (instanceof SmokeCloudEmitter РІРјРµСЃС‚Рѕ Р¶С‘СЃС‚РєРѕРіРѕ
- * СЃРїРёСЃРєР° РєР»Р°СЃСЃРѕРІ) Рё РµСЃС‚СЊ С‚РѕС‡РєР° СЂР°СЃС€РёСЂРµРЅРёСЏ API.
- */
 @Mod.EventBusSubscriber(modid = AasGranate.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class SmokeStageRenderer {
     private static final Set<Entity> CANDIDATES = new LinkedHashSet<>();
@@ -2049,7 +1988,7 @@ public final class SmokeStageRenderer {
     }
 
     private static boolean isSmokeEntity(Entity entity) {
-        return entity instanceof SmokeCloudEmitter;
+        return entity instanceof Rdg2Entity || entity instanceof M18Entity;
     }
 
     @SubscribeEvent
@@ -2071,9 +2010,10 @@ public final class SmokeStageRenderer {
         float partial = event.getPartialTick();
         for (Entity entity : CANDIDATES) {
             if (entity.isRemoved()) continue;
-            SmokeCloudEmitter emitter = (SmokeCloudEmitter) entity;
-            boolean smoking = emitter.isSmoking() && emitter.getSmokeDensity(partial) > 0.002F;
-            if (smoking && event.getFrustum().isVisible(bounds(entity, emitter, partial))) VISIBLE.add(entity);
+            boolean smoking = entity instanceof Rdg2Entity e
+                    ? e.isSmoking() && e.getSmokeDensity(partial) > 0.002F
+                    : ((M18Entity) entity).isSmoking() && ((M18Entity) entity).getSmokeDensity(partial) > 0.002F;
+            if (smoking && event.getFrustum().isVisible(bounds(entity, partial))) VISIBLE.add(entity);
         }
         if (VISIBLE.isEmpty()) return;
 
@@ -2081,6 +2021,8 @@ public final class SmokeStageRenderer {
         Vec3 camera = event.getCamera().getPosition();
         EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
         BufferBuilder builder = SmokePipeline.begin(event.getProjectionMatrix());
+        // РћРґРёРЅ С„Р°РєС‚РѕСЂ РґРЅСЏ/РЅРѕС‡Рё РЅР° РІРµСЃСЊ РєР°РґСЂ: РЅРѕС‡СЊСЋ РґС‹Рј С‚РµРјРЅРµРµС‚ РІРјРµСЃС‚Рµ СЃ РјРёСЂРѕРј.
+        SmokeTimeOfDay.update(mc.level, partial);
         MultiBufferSource smoke = type -> builder;
         for (Entity entity : VISIBLE) {
             poses.pushPose();
@@ -2095,8 +2037,6 @@ public final class SmokeStageRenderer {
                 } else if (entity instanceof M18Entity e) {
                     M18SmokeCloudRenderer.render(e, partial, poses, smoke, light);
                     M18SparkRenderer.render(e, partial, poses, SPARK_BUFFER);
-                } else if (entity instanceof AasSmokeSourceEntity e) {
-                    GenericSmokeCloudRenderer.render(e, partial, poses, smoke, light);
                 }
             } finally {
                 poses.popPose();
@@ -2107,12 +2047,12 @@ public final class SmokeStageRenderer {
         SmokePipeline.upload();
     }
 
-    private static AABB bounds(Entity entity, SmokeCloudEmitter emitter, float partial) {
+    private static AABB bounds(Entity entity, float partial) {
         double x = Mth.lerp(partial, entity.xo, entity.getX());
         double y = Mth.lerp(partial, entity.yo, entity.getY());
         double z = Mth.lerp(partial, entity.zo, entity.getZ());
-        double radius = emitter.getSmokeRadius();
-        double height = emitter.getSmokeHeight();
+        double radius = entity instanceof Rdg2Entity ? Rdg2Entity.SMOKE_RADIUS : M18Entity.SMOKE_RADIUS;
+        double height = entity instanceof Rdg2Entity ? Rdg2Entity.SMOKE_HEIGHT : M18Entity.SMOKE_HEIGHT;
         double horizontal = radius * 1.85;
         double vertical = radius * 0.70;
         AABB result = new AABB(x - horizontal, y - vertical, z - horizontal,
@@ -2131,6 +2071,43 @@ public final class SmokeStageRenderer {
     }
 }
 
+==========================================
+FILE: SmokeTimeOfDay.java
+PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokeTimeOfDay.java
+==========================================
+package com.danilfb123.aasgranate.client;
+
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+
+/**
+ * Р—Р°С‚РµРјРЅРµРЅРёРµ РґС‹РјР° РїРѕ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє. Р”РЅС‘Рј ambient = 1.0, РіР»СѓР±РѕРєРѕР№ РЅРѕС‡СЊСЋ
+ * в‰€ 0.24 вЂ” РґС‹Рј Р±РѕР»СЊС€Рµ РЅРµ СЃРІРµС‚РёС‚СЃСЏ Р±РµР»С‹Рј РїСЏС‚РЅРѕРј РЅР° С‚С‘РјРЅРѕР№ РєР°СЂС‚Рµ.
+ * Р’С‹Р·С‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· Р·Р° РєР°РґСЂ РёР· SmokeStageRenderer.prepare().
+ */
+final class SmokeTimeOfDay {
+
+    private static float ambient = 1.0F;
+    private static float coolTint = 0.0F; // 0 вЂ” РґРµРЅСЊ, 1 вЂ” РіР»СѓР±РѕРєР°СЏ РЅРѕС‡СЊ
+
+    private SmokeTimeOfDay() {}
+
+    static void update(Level level, float partialTick) {
+        // Р’С‹СЃРѕС‚Р° СЃРѕР»РЅС†Р°: 1.0 = РїРѕР»РґРµРЅСЊ, 0 = РіРѕСЂРёР·РѕРЅС‚, -1 = РїРѕР»РЅРѕС‡СЊ.
+        // РўРѕС‚ Р¶Рµ СЃРёРЅСѓСЃ, С‡С‚Рѕ РІР°РЅРёР»Р»Р° РёСЃРїРѕР»СЊР·СѓРµС‚ РґР»СЏ С†РІРµС‚Р° РЅРµР±Р°.
+        float sunAlt = level == null ? 1.0F : Mth.sin(level.getSunAngle(partialTick));
+        float day = Mth.clamp(0.5F + sunAlt * 1.4F, 0.0F, 1.0F);
+        day *= 1.0F - (level == null ? 0.0F : level.getRainLevel(partialTick)) * 0.25F;
+        ambient  = Mth.lerp(0.24F, 1.0F, day);
+        coolTint = 1.0F - day;
+    }
+
+    /** РњРЅРѕР¶РёС‚РµР»СЊ СЏСЂРєРѕСЃС‚Рё РєР»СѓР±РѕРІ: 1.0 РґРЅС‘Рј, 0.24 РіР»СѓР±РѕРєРѕР№ РЅРѕС‡СЊСЋ. */
+    static float ambient() { return ambient; }
+
+    /** РќР°СЃРєРѕР»СЊРєРѕ В«РѕС…Р»Р°РґРёС‚СЊВ» РґС‹Рј РІ Р»СѓРЅРЅРѕРј СЃРІРµС‚Рµ: 0 РґРЅС‘Рј .. 1 РЅРѕС‡СЊСЋ. */
+    static float coolTint() { return coolTint; }
+}
 ==========================================
 FILE: SmokeTransparencyHook.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokeTransparencyHook.java
@@ -4082,6 +4059,16 @@ public class ModEntities {
                             .clientTrackingRange(8)
                             .updateInterval(3)
                             .build("m_18_projectile"));
+
+    public static final RegistryObject<EntityType<AasSmokeSourceEntity>> AAS_SMOKE_SOURCE =
+            ENTITY_TYPES.register("aas_smoke_source",
+                    () -> EntityType.Builder.<AasSmokeSourceEntity>of(AasSmokeSourceEntity::new, MobCategory.MISC)
+                            .sized(0.5f, 0.5f)
+                            .clientTrackingRange(8)
+                            .updateInterval(10)
+                            .fireImmune()
+                            .noSave()
+                            .build("aas_smoke_source"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

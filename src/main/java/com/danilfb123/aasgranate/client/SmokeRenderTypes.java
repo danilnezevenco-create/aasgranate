@@ -13,11 +13,11 @@ public class SmokeRenderTypes extends RenderType {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
 
+    /** Дым без шейдерпака: свой шейдер smoke_cloud. */
     public static final RenderType SMOKE = RenderType.create(
             "aasgranate_smoke",
             DefaultVertexFormat.POSITION_COLOR_TEX,
             VertexFormat.Mode.QUADS,
-
             512 * 1024,
             false,
             true,
@@ -28,9 +28,27 @@ public class SmokeRenderTypes extends RenderType {
                     .setWriteMaskState(COLOR_WRITE)
                     .setDepthTestState(LEQUAL_DEPTH_TEST)
                     .setLightmapState(NO_LIGHTMAP)
-
                     .createCompositeState(false));
 
+    /** Дым с шейдерпаком: ванильный шейдер частиц + мягкая текстура, пак обрабатывает как частицы. */
+    public static final RenderType SMOKE_SHADERS = RenderType.create(
+            "aasgranate_smoke_shaders",
+            DefaultVertexFormat.PARTICLE,
+            VertexFormat.Mode.QUADS,
+            512 * 1024,
+            false,
+            true,
+            CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(GameRenderer::getParticleShader))
+                    .setTextureState(new TextureStateShard(SmokePuffTexture.ID, true, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setLightmapState(LIGHTMAP)
+                    .createCompositeState(false));
+
+    /** Искры: аддитивные штрихи. */
     public static final RenderType SPARKS = RenderType.create(
             "aasgranate_sparks",
             DefaultVertexFormat.POSITION_COLOR,

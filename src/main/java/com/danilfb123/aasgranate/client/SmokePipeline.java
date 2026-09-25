@@ -23,6 +23,7 @@ final class SmokePipeline {
     private static RenderTarget opaqueDepth;
     private static RenderTarget activeGlass;
     private static boolean pending, captured, capturing, fabulous;
+    private static boolean shaderPack; // Iris/OptiFine рисуют мир в свою цель
     private static int nesting;
 
     private SmokePipeline() {}
@@ -32,6 +33,7 @@ final class SmokePipeline {
         nesting = 0;
         activeGlass = null;
         fabulous = Minecraft.useShaderTransparency();
+        shaderPack = IrisCompat.shadersActive();
         MODEL_VIEW.set(RenderSystem.getModelViewMatrix());
         PROJECTION.set(projection);
         BUILDER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -56,7 +58,8 @@ final class SmokePipeline {
     }
 
     static void beginTranslucent() {
-        if (!pending || captured) return;
+        // Шейдеры: не перехватываем translucent-цель — ею владеет Iris.
+        if (!pending || captured || shaderPack) return;
         if (capturing) { nesting++; return; }
         Minecraft mc = Minecraft.getInstance();
         RenderTarget main = mc.getMainRenderTarget();
@@ -78,7 +81,7 @@ final class SmokePipeline {
     }
 
     static void endTranslucent() {
-        if (!capturing) return;
+        if (!capturing || shaderPack) return;
         if (nesting > 0) { nesting--; return; }
         capturing = false;
         RenderTarget main = Minecraft.getInstance().getMainRenderTarget();
@@ -96,15 +99,34 @@ final class SmokePipeline {
     }
 
     static void afterParticles() {
-        // If a third-party renderer bypasses the wrapped RenderType, draw before the
-        // Fabulous composite clears opaque depth. The fallback must not reveal smoke
-        // through solid walls (its glass ordering remains that renderer's limitation).
+        // ПРИ ШЕЙДЕРАХ: дым рисуем прямо в цель, которую Iris держит
+        // привязанной на стадии AFTER_PARTICLES. Iris-композит пройдёт
+        // ПОСЛЕ — и дым окажется ВНУТРИ кадра, а не под ним.
+        if (shaderPack) {
+            if (pending) finishInPlace();
+            return;
+        }
         if (pending && (!fabulous || !captured)) finish();
     }
 
     static void afterLevel() {
-        // Also covers renderers which omit the usual terrain-layer callback.
+        if (shaderPack) {
+            if (pending) finishInPlace(); // подстраховка: AFTER_PARTICLES не fired
+            return;
+        }
         if (pending) finish();
+    }
+
+    /** Шейдер-режим: рисуем в текуще привязанную цель с обычным тестом
+     *  глубины (глубина сцены Iris уже лежит в её depth-буфере). Без
+     *  bindWrite(main) — именно он раньше уносил дым "под" композит. */
+    private static void finishInPlace() {
+        try {
+            draw(0, false); // Pass 0: позади стекла не нужно, UseOpaqueDepth = 0
+        } finally {
+            pending = false;
+            activeGlass = null;
+        }
     }
 
     private static void finish() {
@@ -192,6 +214,7 @@ final class SmokePipeline {
         if (mesh != null) { mesh.close(); mesh = null; }
         if (glassTarget != null) { glassTarget.destroyBuffers(); glassTarget = null; }
         if (opaqueDepth != null) { opaqueDepth.destroyBuffers(); opaqueDepth = null; }
+        SmokePuffTexture.invalidate();
         SmokePuffCache.clear();
     }
 }

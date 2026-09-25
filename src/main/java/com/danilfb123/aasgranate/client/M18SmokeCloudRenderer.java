@@ -39,7 +39,8 @@ public final class M18SmokeCloudRenderer {
         int blockLight = LightTexture.block(packedLight);
         int skyLight   = LightTexture.sky(packedLight);
         float lum = Math.max(blockLight, skyLight) / 15.0F;
-        float bright = 0.30F + 0.70F * lum;
+        float tint = 1.0F - 0.10F * SmokeTimeOfDay.coolTint();   // было 0.25F
+        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient() * tint;
 
         Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
@@ -82,8 +83,8 @@ public final class M18SmokeCloudRenderer {
 
             float grey = (BASE_GREY + greyVar) * bright;
             int cr = clamp255(grey * 255.0F);
-            int cg = clamp255(grey * 255.0F);
-            int cb = clamp255((grey * 0.99F) * 255.0F);
+            int cg = cr;
+            int cb = cr;
             int ca = clamp255(alpha * 255.0F);
             if (ca <= 0) continue;
 
