@@ -8,11 +8,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -81,6 +84,7 @@ public final class SmokeStageRenderer {
         Minecraft mc = Minecraft.getInstance();
         trackLevel(mc.level);
         if (mc.level == null || !SmokeShaders.ready()) return;
+
         VISIBLE.clear();
         float partial = event.getPartialTick();
         for (Entity entity : CANDIDATES) {
@@ -90,7 +94,11 @@ public final class SmokeStageRenderer {
                     : ((M18Entity) entity).isSmoking() && ((M18Entity) entity).getSmokeDensity(partial) > 0.002F;
             if (smoking && event.getFrustum().isVisible(bounds(entity, partial))) VISIBLE.add(entity);
         }
-        if (VISIBLE.isEmpty()) return;
+
+        // Облака, у которых сейчас нет "живой" Entity на клиенте (вышли за дистанцию
+        // трекинга), но которые ещё не догорели по своим собственным таймерам.
+        boolean hasDetachedClouds = !ClientSmokeCloudManager.all().isEmpty();
+        if (VISIBLE.isEmpty() && !hasDetachedClouds) return;
 
         PoseStack poses = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
@@ -125,6 +133,38 @@ public final class SmokeStageRenderer {
                 }
             } finally {
                 poses.popPose();
+            }
+        }
+
+        if (hasDetachedClouds) {
+            for (Map.Entry<Integer, ClientSmokeCloudManager.Cloud> e : ClientSmokeCloudManager.all().entrySet()) {
+                int cloudId = e.getKey();
+                if (mc.level.getEntity(cloudId) != null) continue; // эту сущность и так уже нарисовал цикл выше
+
+                ClientSmokeCloudManager.Cloud cloud = e.getValue();
+                if (cloud.getSmokeDensity(partial) <= 0.002F) continue;
+
+                double cx = Mth.lerp(partial, cloud.xo, cloud.x);
+                double cy = Mth.lerp(partial, cloud.yo, cloud.y);
+                double cz = Mth.lerp(partial, cloud.zo, cloud.z);
+
+                double horizontal = cloud.getRadius() * 1.85;
+                double vertical = cloud.getRadius() * 0.70;
+                AABB box = new AABB(
+                        cx - horizontal, cy - vertical, cz - horizontal,
+                        cx + horizontal, cy + cloud.getHeight() + vertical, cz + horizontal);
+                if (!event.getFrustum().isVisible(box)) continue;
+
+                BlockPos lightPos = BlockPos.containing(cx, cy + 1, cz);
+                int light = LevelRenderer.getLightColor(mc.level, lightPos);
+
+                poses.pushPose();
+                try {
+                    poses.translate(cx - camera.x, cy - camera.y, cz - camera.z);
+                    DetachedSmokeCloudRenderer.render(cloudId, cloud, partial, poses, smoke, light);
+                } finally {
+                    poses.popPose();
+                }
             }
         }
 

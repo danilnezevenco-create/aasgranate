@@ -2,6 +2,7 @@ package com.danilfb123.aasgranate;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import com.danilfb123.aasgranate.network.SmokeCloudSyncPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -230,11 +231,13 @@ public class M18Entity extends ThrowableProjectile implements GeoEntity {
             if (this.fuseTimer <= 0) {
                 this.smokeTicks = 0;
                 this.entityData.set(DATA_SMOKE_TICKS, 0);
+                SmokeCloudBroadcaster.sync(this, SmokeCloudSyncPacket.Kind.M18, 0); // старт дыма — сообщаем сразу
             }
         } else {
             this.smokeTicks++;
             if (this.smokeTicks % SYNC_INTERVAL == 0) {
                 this.entityData.set(DATA_SMOKE_TICKS, this.smokeTicks);
+                SmokeCloudBroadcaster.sync(this, SmokeCloudSyncPacket.Kind.M18, this.smokeTicks);
             }
             if (this.smokeTicks >= TOTAL_SMOKE_TICKS) {
                 this.discard();

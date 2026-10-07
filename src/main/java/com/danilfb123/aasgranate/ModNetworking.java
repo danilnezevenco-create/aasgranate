@@ -3,6 +3,7 @@ package com.danilfb123.aasgranate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import com.danilfb123.aasgranate.network.SmokeCloudSyncPacket;
 
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +34,11 @@ public class ModNetworking {
                 HitboxDebugPacket::encode,
                 HitboxDebugPacket::decode,
                 HitboxDebugPacket::handle);
+        CHANNEL.registerMessage(id++,
+                SmokeCloudSyncPacket.class,
+                SmokeCloudSyncPacket::encode,
+                SmokeCloudSyncPacket::decode,
+                SmokeCloudSyncPacket::handle);
     }
 
     public static void setHitboxDebug(UUID playerId, boolean enabled) {

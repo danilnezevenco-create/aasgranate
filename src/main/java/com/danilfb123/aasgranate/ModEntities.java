@@ -42,7 +42,7 @@ public class ModEntities {
             ENTITY_TYPES.register("rdg_2_projectile",
                     () -> EntityType.Builder.<Rdg2Entity>of(Rdg2Entity::new, MobCategory.MISC)
                             .sized(0.25f, 0.25f)
-                            .clientTrackingRange(8)
+                            .clientTrackingRange(32)
                             .updateInterval(3)
                             .build("rdg_2_projectile"));
 
@@ -52,7 +52,7 @@ public class ModEntities {
             ENTITY_TYPES.register("m_18_projectile",
                     () -> EntityType.Builder.<M18Entity>of(M18Entity::new, MobCategory.MISC)
                             .sized(0.25f, 0.25f)
-                            .clientTrackingRange(8)
+                            .clientTrackingRange(32)
                             .updateInterval(3)
                             .build("m_18_projectile"));
 

@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import com.danilfb123.aasgranate.network.SmokeCloudSyncPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
@@ -258,11 +259,13 @@ public class Rdg2Entity extends ThrowableProjectile implements GeoEntity {
             if (this.fuseTimer <= 0) {
                 this.smokeTicks = 0;
                 this.entityData.set(DATA_SMOKE_TICKS, 0);
+                SmokeCloudBroadcaster.sync(this, SmokeCloudSyncPacket.Kind.RDG2, 0);
             }
         } else {
             this.smokeTicks++;
             if (this.smokeTicks % SYNC_INTERVAL == 0) {
                 this.entityData.set(DATA_SMOKE_TICKS, this.smokeTicks);
+                SmokeCloudBroadcaster.sync(this, SmokeCloudSyncPacket.Kind.RDG2, this.smokeTicks);
             }
             if (this.smokeTicks >= TOTAL_SMOKE_TICKS) {
                 this.discard();

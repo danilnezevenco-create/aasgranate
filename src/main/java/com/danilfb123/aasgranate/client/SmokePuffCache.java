@@ -2,11 +2,13 @@ package com.danilfb123.aasgranate.client;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.world.entity.Entity;
 
 /** Immutable random attributes; weak keys do not retain removed grenades/worlds. */
 final class SmokePuffCache {
     private static final Map<Entity, Puff[]> CACHE = new WeakHashMap<>();
+    private static final Map<Integer, Puff[]> CACHE_BY_ID = new ConcurrentHashMap<>();
 
     private SmokePuffCache() {}
 
@@ -20,7 +22,22 @@ final class SmokePuffCache {
         return puffs;
     }
 
-    static void clear() { CACHE.clear(); }
+    static Puff[] get(int id, int count) {
+        return CACHE_BY_ID.computeIfAbsent(id, key -> {
+            Puff[] puffs = new Puff[count];
+            for (int i = 0; i < count; i++) puffs[i] = new Puff(key * 8191 + i * 131);
+            return puffs;
+        });
+    }
+
+    static void remove(int id) {
+        CACHE_BY_ID.remove(id);
+    }
+
+    static void clear() {
+        CACHE.clear();
+        CACHE_BY_ID.clear();
+    }
 
     static final class Puff {
         final float azimuth, rFrac, yFrac, sizeVar, spin, p1, p2, p3, greyVar, alphaFactor;

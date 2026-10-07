@@ -189,30 +189,84 @@ PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgran
 ==========================================
 package com.danilfb123.aasgranate.client;
 
+import com.mojang.logging.LogUtils;
 import java.lang.reflect.Method;
+import java.util.Optional;
+import org.slf4j.Logger;
 
-/**
- * РћРїСЂРµРґРµР»СЏРµС‚, Р°РєС‚РёРІРЅС‹ Р»Рё СЃРµР№С‡Р°СЃ Iris / OptiFine С€РµР№РґРµСЂС‹, Р±РµР· Р¶С‘СЃС‚РєРѕР№
- * Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РЅРёС…. РџСЂРё Р°РєС‚РёРІРЅС‹С… С€РµР№РґРµСЂР°С… РјРёСЂ СЂРёСЃСѓРµС‚СЃСЏ РІРѕ РІРЅСѓС‚СЂРµРЅРЅСЋСЋ
- * С†РµР»СЊ С€РµР№РґРµСЂ-РјРѕРґР°, Р° РµРіРѕ С„РёРЅР°Р»СЊРЅС‹Р№ РєРѕРјРїРѕР·РёС‚ РџР•Р Р•Р—РђРџРРЎР«Р’РђР•Рў РіР»Р°РІРЅС‹Р№
- * С„СЂРµР№РјР±СѓС„РµСЂ РїРѕСЃР»Рµ RenderLevelStageEvent вЂ” РїРѕСЌС‚РѕРјСѓ РґС‹Рј РјРѕР¶РЅРѕ СЂРёСЃРѕРІР°С‚СЊ
- * С‚РѕР»СЊРєРѕ "РІ С‚Рѕ, С‡С‚Рѕ РїСЂРёРІСЏР·Р°РЅРѕ СЃРµР№С‡Р°СЃ", РЅРµ С‚СЂРѕРіР°СЏ mainRenderTarget.
- */
+/** РћРїСЂРµРґРµР»СЏРµС‚, Р°РєС‚РёРІРЅС‹ Р»Рё С€РµР№РґРµСЂС‹ Iris / Oculus / OptiFine. */
 final class IrisCompat {
 
-    private static final Object IRIS_API = findIrisApi();
-    private static final Method IRIS_IN_USE = findIrisMethod();
-    private static final Method OPTIFINE_SHADERS = findOptifineMethod();
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    // РЈ Iris/Oculus РґР»СЏ 1.20.1 API РјРѕР¶РµС‚ Р»РµР¶Р°С‚СЊ РІ СЂР°Р·РЅС‹С… РїР°РєРµС‚Р°С….
+    private static final String[] API_CLASSES = {
+            "net.irisshaders.iris.api.v0.IrisApi",
+            "net.coderbot.iris.api.v0.IrisApi"
+    };
+    private static final String[] IRIS_CLASSES = {
+            "net.irisshaders.iris.Iris",
+            "net.coderbot.iris.Iris"
+    };
+
+    private static final Object IRIS_API;
+    private static final Method IRIS_IN_USE;
+    private static final Method IRIS_CURRENT_PACK;
+    private static final Method OPTIFINE_SHADERS;
+
+    static {
+        Object api = null;
+        Method inUse = null;
+        for (String name : API_CLASSES) {
+            try {
+                Class<?> c = Class.forName(name);
+                api = c.getMethod("getInstance").invoke(null);
+                inUse = c.getMethod("isShaderPackInUse"); // РјРµС‚РѕРґ РёРЅС‚РµСЂС„РµР№СЃР°, РЅРµ СЂРµР°Р»РёР·Р°С†РёРё
+                LOGGER.info("[aasgranate] Iris API found: {}", name);
+                break;
+            } catch (Throwable ignored) {
+                api = null;
+                inUse = null;
+            }
+        }
+        IRIS_API = api;
+        IRIS_IN_USE = inUse;
+
+        Method pack = null;
+        for (String name : IRIS_CLASSES) {
+            try {
+                pack = Class.forName(name).getMethod("getCurrentPack");
+                LOGGER.info("[aasgranate] Iris class found: {}", name);
+                break;
+            } catch (Throwable ignored) {}
+        }
+        IRIS_CURRENT_PACK = pack;
+
+        Method of = null;
+        try {
+            of = Class.forName("net.optifine.Config").getMethod("isShaders");
+        } catch (Throwable ignored) {}
+        OPTIFINE_SHADERS = of;
+
+        if (IRIS_IN_USE == null && IRIS_CURRENT_PACK == null && OPTIFINE_SHADERS == null)
+            LOGGER.info("[aasgranate] No Iris/Oculus/OptiFine detected");
+    }
 
     private static long lastCheck;
     private static boolean cached;
+    private static boolean logged;
 
     private IrisCompat() {}
 
     static boolean shadersActive() {
         long now = System.nanoTime();
-        if (now - lastCheck > 500_000_000L) { // РЅРµ С‡Р°С‰Рµ 2 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ
-            cached = compute();
+        if (now - lastCheck > 500_000_000L) {
+            boolean value = compute();
+            if (!logged || value != cached) {
+                LOGGER.info("[aasgranate] shader pack active = {}", value);
+                logged = true;
+            }
+            cached = value;
             lastCheck = now;
         }
         return cached;
@@ -222,41 +276,20 @@ final class IrisCompat {
         if (IRIS_IN_USE != null) {
             try {
                 return (boolean) IRIS_IN_USE.invoke(IRIS_API);
-            } catch (ReflectiveOperationException ignored) {}
+            } catch (Throwable ignored) {}
+        }
+        if (IRIS_CURRENT_PACK != null) {
+            try {
+                Object r = IRIS_CURRENT_PACK.invoke(null);
+                if (r instanceof Optional<?> opt) return opt.isPresent();
+            } catch (Throwable ignored) {}
         }
         if (OPTIFINE_SHADERS != null) {
             try {
                 return (boolean) OPTIFINE_SHADERS.invoke(null);
-            } catch (ReflectiveOperationException ignored) {}
+            } catch (Throwable ignored) {}
         }
         return false;
-    }
-
-    private static Object findIrisApi() {
-        try {
-            Class<?> api = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
-            return api.getMethod("getInstance").invoke(null);
-        } catch (ReflectiveOperationException e) {
-            return null; // Iris РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ вЂ” СЌС‚Рѕ РЅРѕСЂРјР°
-        }
-    }
-
-    private static Method findIrisMethod() {
-        if (IRIS_API == null) return null;
-        try {
-            return IRIS_API.getClass().getMethod("isShaderPackInUse");
-        } catch (ReflectiveOperationException e) {
-            return null;
-        }
-    }
-
-    private static Method findOptifineMethod() {
-        try {
-            Class<?> config = Class.forName("net.optifine.Config");
-            return config.getMethod("isShaders");
-        } catch (ReflectiveOperationException e) {
-            return null; // OptiFine РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ
-        }
     }
 }
 ==========================================
@@ -459,7 +492,8 @@ public final class M18SmokeCloudRenderer {
         int blockLight = LightTexture.block(packedLight);
         int skyLight   = LightTexture.sky(packedLight);
         float lum = Math.max(blockLight, skyLight) / 15.0F;
-        float bright = 0.30F + 0.70F * lum;
+        float tint = 1.0F - 0.10F * SmokeTimeOfDay.coolTint();   // Р±С‹Р»Рѕ 0.25F
+        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient() * tint;
 
         Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
@@ -502,8 +536,8 @@ public final class M18SmokeCloudRenderer {
 
             float grey = (BASE_GREY + greyVar) * bright;
             int cr = clamp255(grey * 255.0F);
-            int cg = clamp255(grey * 255.0F);
-            int cb = clamp255((grey * 0.99F) * 255.0F);
+            int cg = cr;
+            int cb = cr;
             int ca = clamp255(alpha * 255.0F);
             if (ca <= 0) continue;
 
@@ -1349,16 +1383,39 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-/** Four vertices; the shader reproduces the original octagon and 60% solid core. */
 final class SmokeBillboard {
+    /** true: СЂРёСЃСѓРµРј С‚РµРєСЃС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РєРІР°Рґ РґР»СЏ С€РµР№РґРµСЂРїР°РєР° (С„РѕСЂРјР°С‚ PARTICLE). РЎС‚Р°РІРёС‚СЃСЏ РєР°Р¶РґС‹Р№ РєР°РґСЂ. */
+    static boolean shaderMode;
+    /** РЈРїР°РєРѕРІР°РЅРЅС‹Р№ СЃРІРµС‚ С‚РµРєСѓС‰РµР№ РіСЂР°РЅР°С‚С‹ (РґР»СЏ СЂРµР¶РёРјР° С€РµР№РґРµСЂРїР°РєР°). */
+    static int light = 15728880;
+
     private SmokeBillboard() {}
 
     static void draw(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
                      float x, float y, float z, float radius, int r, int g, int b, int a) {
+        if (shaderMode) {
+            particle(vc, pose, right, up, x, y, z, radius, -1, -1, r, g, b, a);
+            particle(vc, pose, right, up, x, y, z, radius,  1, -1, r, g, b, a);
+            particle(vc, pose, right, up, x, y, z, radius,  1,  1, r, g, b, a);
+            particle(vc, pose, right, up, x, y, z, radius, -1,  1, r, g, b, a);
+            return;
+        }
         vertex(vc, pose, right, up, x, y, z, radius, -1, -1, r, g, b, a);
         vertex(vc, pose, right, up, x, y, z, radius,  1, -1, r, g, b, a);
         vertex(vc, pose, right, up, x, y, z, radius,  1,  1, r, g, b, a);
         vertex(vc, pose, right, up, x, y, z, radius, -1,  1, r, g, b, a);
+    }
+
+    private static void particle(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
+                                 float x, float y, float z, float radius, float u, float v,
+                                 int r, int g, int b, int a) {
+        vc.vertex(pose, x + radius * (right.x * u + up.x * v),
+                        y + radius * (right.y * u + up.y * v),
+                        z + radius * (right.z * u + up.z * v))
+                .uv((u + 1.0F) * 0.5F, (v + 1.0F) * 0.5F)
+                .color(r, g, b, a)
+                .uv2(light)
+                .endVertex();
     }
 
     private static void vertex(VertexConsumer vc, Matrix4f pose, Vector3f right, Vector3f up,
@@ -1370,7 +1427,6 @@ final class SmokeBillboard {
                 .color(r, g, b, a).uv(u, v).endVertex();
     }
 }
-
 ==========================================
 FILE: SmokeCloudRenderer.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokeCloudRenderer.java
@@ -1416,12 +1472,9 @@ public final class SmokeCloudRenderer {
         int blockLight = LightTexture.block(packedLight);
         int skyLight   = LightTexture.sky(packedLight);
         float lum = Math.max(blockLight, skyLight) / 15.0F;
+        // Р›РѕРєР°Р»СЊРЅС‹Р№ СЃРІРµС‚ Рё РІС‹СЃРѕС‚Р° СЃРѕР»РЅС†Р°: РЅРѕС‡СЊСЋ РґС‹Рј РЅРµ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р±РµР»С‹Рј РїСЏС‚РЅРѕРј РЅР° С‡С‘СЂРЅРѕР№ РєР°СЂС‚Рµ.
         float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient();
-        float tint = 1.0F - 0.18F * SmokeTimeOfDay.coolTint();
-        // Р›РѕРєР°Р»СЊРЅС‹Р№ СЃРІРµС‚ Р РІС‹СЃРѕС‚Р° СЃРѕР»РЅС†Р°: СЂР°РЅСЊС€Рµ РґС‹Рј Р·РЅР°Р» С‚РѕР»СЊРєРѕ РїСЂРѕ СЃРІРµС‚
-        // РІ СЃРІРѕРµР№ С‚РѕС‡РєРµ, РїРѕСЌС‚РѕРјСѓ РЅРѕС‡СЊСЋ СЃС‚РѕСЏР» Р±РµР»С‹Рј РїСЏС‚РЅРѕРј РЅР° С‡С‘СЂРЅРѕР№ РєР°СЂС‚Рµ.
-        float bright = (0.30F + 0.70F * lum) * SmokeTimeOfDay.ambient();
-        float tint = 1.0F - 0.18F * SmokeTimeOfDay.coolTint();
+        float tint = 1.0F - 0.10F * SmokeTimeOfDay.coolTint();   // Р±С‹Р»Рѕ 0.25F   // РЅРѕС‡СЊСЋ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ С‚РµРјРЅРµРµ, Р±РµР· С†РІРµС‚РѕРІРѕРіРѕ СЃРґРІРёРіР°
 
         Quaternionf camera = Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation();
         Vector3f right = camera.transform(new Vector3f(1.0F, 0.0F, 0.0F));
@@ -1430,7 +1483,7 @@ public final class SmokeCloudRenderer {
         VertexConsumer vc = bufferSource.getBuffer(SmokeRenderTypes.SMOKE);
         Matrix4f pose = poseStack.last().pose();
 
-        renderTrail(entity, partialTick, vc, pose, right, up, bright);
+        renderTrail(entity, partialTick, vc, pose, right, up, bright, tint);
 
         float growth = entity.getSmokeGrowth(partialTick);
         float inv = 1.0F - growth;
@@ -1464,8 +1517,8 @@ public final class SmokeCloudRenderer {
 
             float grey = (BASE_GREY + greyVar) * bright;
             int cr = clamp255(grey * tint * 255.0F);
-            int cg = clamp255(grey * tint * 255.0F);
-            int cb = clamp255((grey * 0.99F) * 255.0F);
+            int cg = cr;
+            int cb = cr;                                             // СЂР°РЅСЊС€Рµ Р±С‹Р»Рѕ grey * 0.99F: РёР·-Р·Р° СЌС‚РѕРіРѕ С€С‘Р» СЃРёРЅРёР№ РѕС‚С‚РµРЅРѕРє
             int ca = clamp255(alpha * 255.0F);
             if (ca <= 0) continue;
 
@@ -1763,6 +1816,7 @@ final class SmokePipeline {
         if (mesh != null) { mesh.close(); mesh = null; }
         if (glassTarget != null) { glassTarget.destroyBuffers(); glassTarget = null; }
         if (opaqueDepth != null) { opaqueDepth.destroyBuffers(); opaqueDepth = null; }
+        SmokePuffTexture.invalidate();
         SmokePuffCache.clear();
     }
 }
@@ -1824,6 +1878,44 @@ final class SmokePuffCache {
 }
 
 ==========================================
+FILE: SmokePuffTexture.java
+PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokePuffTexture.java
+==========================================
+package com.danilfb123.aasgranate.client;
+
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.ResourceLocation;
+
+/** РњСЏРіРєРѕРµ РїСЏС‚РЅРѕ РґС‹РјР° (С‚РѕС‚ Р¶Рµ РІРѕСЃСЊРјРёСѓРіРѕР»СЊРЅРёРє, С‡С‚Рѕ РІ smoke_cloud.fsh) РґР»СЏ СЂРµР¶РёРјР° С€РµР№РґРµСЂРїР°РєР°. */
+final class SmokePuffTexture {
+    static final ResourceLocation ID = new ResourceLocation("aasgranate", "dynamic/smoke_puff");
+    private static final int SIZE = 64;
+    private static boolean ready;
+
+    private SmokePuffTexture() {}
+
+    static void ensure() {
+        if (ready) return;
+        NativeImage img = new NativeImage(NativeImage.Format.RGBA, SIZE, SIZE, false);
+        for (int y = 0; y < SIZE; y++) {
+            for (int x = 0; x < SIZE; x++) {
+                float px = Math.abs((x + 0.5F) / SIZE * 2.0F - 1.0F);
+                float py = Math.abs((y + 0.5F) / SIZE * 2.0F - 1.0F);
+                float edge = Math.max(px + 0.41421356F * py, py + 0.41421356F * px);
+                float cov = Math.max(0.0F, Math.min(1.0F, (1.0F - edge) / 0.40F));
+                int a = (int) (cov * 255.0F);
+                img.setPixelRGBA(x, y, (a << 24) | 0x00FFFFFF);
+            }
+        }
+        Minecraft.getInstance().getTextureManager().register(ID, new DynamicTexture(img));
+        ready = true;
+    }
+
+    static void invalidate() { ready = false; }
+}
+==========================================
 FILE: SmokeRenderTypes.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokeRenderTypes.java
 ==========================================
@@ -1842,11 +1934,11 @@ public class SmokeRenderTypes extends RenderType {
         super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
     }
 
+    /** Р”С‹Рј Р±РµР· С€РµР№РґРµСЂРїР°РєР°: СЃРІРѕР№ С€РµР№РґРµСЂ smoke_cloud. */
     public static final RenderType SMOKE = RenderType.create(
             "aasgranate_smoke",
             DefaultVertexFormat.POSITION_COLOR_TEX,
             VertexFormat.Mode.QUADS,
-
             512 * 1024,
             false,
             true,
@@ -1857,9 +1949,27 @@ public class SmokeRenderTypes extends RenderType {
                     .setWriteMaskState(COLOR_WRITE)
                     .setDepthTestState(LEQUAL_DEPTH_TEST)
                     .setLightmapState(NO_LIGHTMAP)
-
                     .createCompositeState(false));
 
+    /** Р”С‹Рј СЃ С€РµР№РґРµСЂРїР°РєРѕРј: РІР°РЅРёР»СЊРЅС‹Р№ С€РµР№РґРµСЂ С‡Р°СЃС‚РёС† + РјСЏРіРєР°СЏ С‚РµРєСЃС‚СѓСЂР°, РїР°Рє РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РєР°Рє С‡Р°СЃС‚РёС†С‹. */
+    public static final RenderType SMOKE_SHADERS = RenderType.create(
+            "aasgranate_smoke_shaders",
+            DefaultVertexFormat.PARTICLE,
+            VertexFormat.Mode.QUADS,
+            512 * 1024,
+            false,
+            true,
+            CompositeState.builder()
+                    .setShaderState(new ShaderStateShard(GameRenderer::getParticleShader))
+                    .setTextureState(new TextureStateShard(SmokePuffTexture.ID, true, false))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setLightmapState(LIGHTMAP)
+                    .createCompositeState(false));
+
+    /** РСЃРєСЂС‹: Р°РґРґРёС‚РёРІРЅС‹Рµ С€С‚СЂРёС…Рё. */
     public static final RenderType SPARKS = RenderType.create(
             "aasgranate_sparks",
             DefaultVertexFormat.POSITION_COLOR,
@@ -1876,7 +1986,6 @@ public class SmokeRenderTypes extends RenderType {
                     .setLightmapState(NO_LIGHTMAP)
                     .createCompositeState(false));
 }
-
 ==========================================
 FILE: SmokeShaders.java
 PATH: C:\Users\user\Desktop\mods\aasgranate\src\main\java\com\danilfb123\aasgranate\client\SmokeShaders.java
@@ -1958,7 +2067,8 @@ public final class SmokeStageRenderer {
     private static final MultiBufferSource.BufferSource SPARK_BUFFER =
             MultiBufferSource.immediate(new BufferBuilder(64 * 1024));
     private static ClientLevel trackedLevel;
-
+    private static final MultiBufferSource.BufferSource SHADER_BUFFER =
+            MultiBufferSource.immediate(new BufferBuilder(256 * 1024));
     private SmokeStageRenderer() {}
 
     @SubscribeEvent
@@ -2020,10 +2130,19 @@ public final class SmokeStageRenderer {
         PoseStack poses = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
         EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-        BufferBuilder builder = SmokePipeline.begin(event.getProjectionMatrix());
-        // РћРґРёРЅ С„Р°РєС‚РѕСЂ РґРЅСЏ/РЅРѕС‡Рё РЅР° РІРµСЃСЊ РєР°РґСЂ: РЅРѕС‡СЊСЋ РґС‹Рј С‚РµРјРЅРµРµС‚ РІРјРµСЃС‚Рµ СЃ РјРёСЂРѕРј.
+
+        boolean shaders = IrisCompat.shadersActive();
+        SmokeBillboard.shaderMode = shaders;
+        if (shaders) SmokePuffTexture.ensure();
+        BufferBuilder builder = shaders ? null : SmokePipeline.begin(event.getProjectionMatrix());
+
         SmokeTimeOfDay.update(mc.level, partial);
-        MultiBufferSource smoke = type -> builder;
+        if (shaders) SmokeTimeOfDay.neutral();
+
+        MultiBufferSource smoke = shaders
+                ? type -> SHADER_BUFFER.getBuffer(SmokeRenderTypes.SMOKE_SHADERS)
+                : type -> builder;
+
         for (Entity entity : VISIBLE) {
             poses.pushPose();
             try {
@@ -2031,6 +2150,7 @@ public final class SmokeStageRenderer {
                         Mth.lerp(partial, entity.yo, entity.getY()) - camera.y,
                         Mth.lerp(partial, entity.zo, entity.getZ()) - camera.z);
                 int light = dispatcher.getPackedLightCoords(entity, partial);
+                SmokeBillboard.light = light;
                 if (entity instanceof Rdg2Entity e) {
                     SmokeCloudRenderer.render(e, partial, poses, smoke, light);
                     SparkRenderer.render(e, partial, poses, SPARK_BUFFER);
@@ -2042,9 +2162,10 @@ public final class SmokeStageRenderer {
                 poses.popPose();
             }
         }
-        // Independent buffers: sparks no longer flush a partly built smoke batch.
+
+        if (shaders) SHADER_BUFFER.endBatch(SmokeRenderTypes.SMOKE_SHADERS);
+        else SmokePipeline.upload();
         SPARK_BUFFER.endBatch();
-        SmokePipeline.upload();
     }
 
     private static AABB bounds(Entity entity, float partial) {
@@ -2081,31 +2202,33 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 /**
- * Р—Р°С‚РµРјРЅРµРЅРёРµ РґС‹РјР° РїРѕ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє. Р”РЅС‘Рј ambient = 1.0, РіР»СѓР±РѕРєРѕР№ РЅРѕС‡СЊСЋ
- * в‰€ 0.24 вЂ” РґС‹Рј Р±РѕР»СЊС€Рµ РЅРµ СЃРІРµС‚РёС‚СЃСЏ Р±РµР»С‹Рј РїСЏС‚РЅРѕРј РЅР° С‚С‘РјРЅРѕР№ РєР°СЂС‚Рµ.
+ * Р—Р°С‚РµРјРЅРµРЅРёРµ РґС‹РјР° РїРѕ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє. Р”РЅС‘Рј ambient = 1.0, РЅРѕС‡СЊСЋ РѕРєРѕР»Рѕ 0.38.
  * Р’С‹Р·С‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· Р·Р° РєР°РґСЂ РёР· SmokeStageRenderer.prepare().
  */
 final class SmokeTimeOfDay {
 
     private static float ambient = 1.0F;
-    private static float coolTint = 0.0F; // 0 вЂ” РґРµРЅСЊ, 1 вЂ” РіР»СѓР±РѕРєР°СЏ РЅРѕС‡СЊ
+    private static float coolTint = 0.0F; // 0 - РґРµРЅСЊ, 1 - РіР»СѓР±РѕРєР°СЏ РЅРѕС‡СЊ
 
     private SmokeTimeOfDay() {}
 
     static void update(Level level, float partialTick) {
         // Р’С‹СЃРѕС‚Р° СЃРѕР»РЅС†Р°: 1.0 = РїРѕР»РґРµРЅСЊ, 0 = РіРѕСЂРёР·РѕРЅС‚, -1 = РїРѕР»РЅРѕС‡СЊ.
-        // РўРѕС‚ Р¶Рµ СЃРёРЅСѓСЃ, С‡С‚Рѕ РІР°РЅРёР»Р»Р° РёСЃРїРѕР»СЊР·СѓРµС‚ РґР»СЏ С†РІРµС‚Р° РЅРµР±Р°.
-        float sunAlt = level == null ? 1.0F : Mth.sin(level.getSunAngle(partialTick));
+        float sunAlt = level == null ? 1.0F : Mth.cos(level.getSunAngle(partialTick));
         float day = Mth.clamp(0.5F + sunAlt * 1.4F, 0.0F, 1.0F);
         day *= 1.0F - (level == null ? 0.0F : level.getRainLevel(partialTick)) * 0.25F;
-        ambient  = Mth.lerp(0.24F, 1.0F, day);
+        ambient  = Mth.lerp(day, 0.38F, 1.0F);
         coolTint = 1.0F - day;
     }
 
-    /** РњРЅРѕР¶РёС‚РµР»СЊ СЏСЂРєРѕСЃС‚Рё РєР»СѓР±РѕРІ: 1.0 РґРЅС‘Рј, 0.24 РіР»СѓР±РѕРєРѕР№ РЅРѕС‡СЊСЋ. */
+    /** Р РµР¶РёРј С€РµР№РґРµСЂРїР°РєР°: РїР°Рє СЃР°Рј РѕСЃРІРµС‰Р°РµС‚ РґС‹Рј, РЅР°С€Рё РјРЅРѕР¶РёС‚РµР»Рё РЅРµ РЅСѓР¶РЅС‹. */
+    static void neutral() {
+        ambient = 1.0F;
+        coolTint = 0.0F;
+    }
+
     static float ambient() { return ambient; }
 
-    /** РќР°СЃРєРѕР»СЊРєРѕ В«РѕС…Р»Р°РґРёС‚СЊВ» РґС‹Рј РІ Р»СѓРЅРЅРѕРј СЃРІРµС‚Рµ: 0 РґРЅС‘Рј .. 1 РЅРѕС‡СЊСЋ. */
     static float coolTint() { return coolTint; }
 }
 ==========================================
@@ -9123,7 +9246,7 @@ mod_id=aasgranate
 mod_name=Aas Granate
 mod_license=All Rights Reserved
 # The mod version. See https://semver.org/
-mod_version=1.0.3
+mod_version=1.0.4
 # The group ID for the mod. It is only important when publishing as an artifact to a Maven repository.
 # This should match the base package used for the mod sources.
 # See https://maven.apache.org/guides/mini/guide-naming-conventions.html
